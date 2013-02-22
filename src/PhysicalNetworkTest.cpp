@@ -9,7 +9,7 @@ class PhysicalNetworkTest: public ::testing::Test{
 
 //constructor
 TEST_F(PhysicalNetworkTest, TestUserList){
-    EXPECT_EQ(3896, network->userList.size());
+    EXPECT_EQ(3897, network->getUserNodeNum());
 }
 
 TEST_F(PhysicalNetworkTest, TestContentList){

@@ -1,5 +1,6 @@
 #include "PhysicalNetwork.hpp"
 
+
 ///////////////////////////////////////////////////////////////////////////////
 // Constructor/Destructor
 ///////////////////////////////////////////////////////////////////////////////
@@ -22,6 +23,7 @@ PhysicalNetwork::PhysicalNetwork()/*{{{*/
     setRandomGeometricPosition();
     connectWithNeighbors();
     delete graph;
+    userNodeNum = userPositionList.size();
 } /*}}}*/
 
 PhysicalNetwork::~PhysicalNetwork()/*{{{*/
@@ -36,6 +38,9 @@ Edge PhysicalNetwork::add_edge(Vertex tail, Vertex head)/*{{{*/
 {
     neighbor[tail].push_back(head);
     neighbor[head].push_back(tail);
+    // 各エッジの重みの設定
+    weight[Edge(tail, head)] = 1.0;
+    weight[Edge(head, tail)] = 1.0;
     return Edge(tail, head);
 }/*}}}*/
 
@@ -89,11 +94,51 @@ void PhysicalNetwork::setPositionUntilAllConnected()/*{{{*/
     }
 }/*}}}*/
 
-VertexList PhysicalNetwork::searchPhysicalShortestPath(const Vertex &from, const Content &content)/*{{{*/
+VertexList PhysicalNetwork::searchPhysicalShortestPath(const Vertex &node_from, const Vertex &node_to, const Content &content)/*{{{*/
 {
-    return VertexList();
+    // TODO: 関係性グラフのほうの重みの計算について、どのようにしてるのか確認する
+    // メモされているものから取り出す
+    ShortestPathMap::iterator it;
+    it = shortestPathMap.find(NodePair(node_from, node_to));
+    if(it != shortestPathMap.end()){
+        return it->second;
+    }
+    // 使用する変数の初期化
+    bool *f = new bool[userNodeNum];
+    Weight *dist = new Weight[userNodeNum];
+    int *prev = new int[userNodeNum];
+    fill_n(dist, userNodeNum, INT_MAX), dist[node_from] = 0, fill_n(prev, userNodeNum, -1);
+    for(int j= 0; j < userNodeNum; j++){
+        f[j] = false;
+    }
+    typedef pair<Weight, int> Distance;
+    priority_queue<Distance, vector<Distance>, less<Distance> > q;
+    q.push(Distance(0, node_from));
+    while (!q.empty()) {
+        int u;
+        Weight d_u;
+        boost::tuples::tie(d_u, u) = q.top(), q.pop();
+        if (f[u]) continue; 
+        f[u] = true;
+        shortestPathMap[NodePair(node_from, u)] = resolvePath(prev, node_from, u);
+        if(node_to == u){
+            return shortestPathMap[NodePair(node_from, node_to)];
+        }
+        foreach (Vertex v, neighbor[u])
+        {
+            if (dist[v] > d_u + weight(u, v))
+            {
+                prev[v] = u, q.push(Distance(dist[v] = d_u + weight(u, v), v));
+            }
+        }
+    }
+    return shortestPathMap[NodePair(node_from, node_to)];
 }/*}}}*/
 
+int PhysicalNetwork::getUserNodeNum()
+{
+    return userNodeNum;
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 // Private
@@ -140,4 +185,18 @@ void PhysicalNetwork::registerIDMapping(const Vertex &physicalID, const Vertex &
 {
         relationalToPhysical[relationalID] = physicalID;
         physicalToRelational[physicalID] = relationalID;
+}/*}}}*/
+
+VertexList PhysicalNetwork::resolvePath(const int *prev, const Vertex &node_from, const Vertex &node_to)/*{{{*/
+{
+    VertexList path;
+    Vertex u = node_from;
+    path.push_back(u);
+    while(u != node_to)
+    {
+        u = prev[u];
+        path.push_back(u);
+    }
+    reverse(path.begin(), path.end());
+    return path;
 }/*}}}*/

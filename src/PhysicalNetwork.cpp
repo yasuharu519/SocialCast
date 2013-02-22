@@ -89,6 +89,12 @@ void PhysicalNetwork::setPositionUntilAllConnected()/*{{{*/
     }
 }/*}}}*/
 
+VertexList PhysicalNetwork::searchPhysicalShortestPath(const Vertex &from, const Content &content)/*{{{*/
+{
+    return VertexList();
+}/*}}}*/
+
+
 ///////////////////////////////////////////////////////////////////////////////
 // Private
 ///////////////////////////////////////////////////////////////////////////////
@@ -125,12 +131,12 @@ void PhysicalNetwork::connectWithNeighbors()/*{{{*/
     }
 }/*}}}*/
 
-double PhysicalNetwork::calcPhysicalDistance(Position p1, Position p2)/*{{{*/
+double PhysicalNetwork::calcPhysicalDistance(const Position &p1, const Position &p2)/*{{{*/
 {
     return sqrt(pow(p2.second - p1.second, 2.0) + pow(p2.first - p1.first, 2.0));
 }/*}}}*/
 
-void PhysicalNetwork::registerIDMapping(Vertex physicalID, Vertex relationalID)/*{{{*/
+void PhysicalNetwork::registerIDMapping(const Vertex &physicalID, const Vertex &relationalID)/*{{{*/
 {
         relationalToPhysical[relationalID] = physicalID;
         physicalToRelational[physicalID] = relationalID;

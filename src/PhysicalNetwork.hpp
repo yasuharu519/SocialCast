@@ -22,6 +22,7 @@ typedef pair<double, double> Position;
 typedef pair<Vertex, Position> UserPosition;
 typedef vector<UserPosition> UserPositionList;
 typedef map<Vertex, Vertex> NodeIDMapping;
+typedef Vertex Content;
 
 using namespace std;
 
@@ -39,13 +40,14 @@ class PhysicalNetwork
         Edge add_edge(Vertex, Vertex);
         bool checkConnectivity();
         void setPositionUntilAllConnected();
+        VertexList searchPhysicalShortestPath(const Vertex &from, const Content &content);
     private:
         int distributorID;
         //
         void setRandomGeometricPosition();
         void connectWithNeighbors();
-        double calcPhysicalDistance(Position, Position);
-        void registerIDMapping(Vertex, Vertex);
+        double calcPhysicalDistance(const Position&, const Position&);
+        void registerIDMapping(const Vertex&, const Vertex&);
 };
 
 #endif /* defined(__SocialCast__Network__) */

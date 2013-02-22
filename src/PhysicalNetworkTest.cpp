@@ -15,3 +15,7 @@ TEST_F(PhysicalNetworkTest, TestUserList){
 TEST_F(PhysicalNetworkTest, TestContentList){
     EXPECT_EQ(5209, network->contentList.size());
 }
+
+TEST_F(PhysicalNetworkTest, TestConnectivity){
+    EXPECT_EQ(true, network->checkConnectivity());
+}

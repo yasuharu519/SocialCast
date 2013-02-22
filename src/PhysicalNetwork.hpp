@@ -15,6 +15,7 @@
 #include <cstdlib>
 #include <boost/random.hpp>
 #include <complex>
+#include <queue>
 
 typedef int Vertex;
 typedef pair<double, double> Position;
@@ -36,6 +37,7 @@ class PhysicalNetwork
         NodeIDMapping relationalToPhysical, physicalToRelational;
         //
         Edge add_edge(Vertex, Vertex);
+        bool checkConnectivity();
     private:
         int distributorID;
         //

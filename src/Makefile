@@ -15,7 +15,8 @@ SRC_DIR = $(PROJ_ROOT)/src
 SRCS        = main.cpp
 OBJS        = $(SRCS:.cpp=.o)
 
-main: Simulator.o RelationalGraph.o EvaluationManager.o
+main: Simulator.o RelationalGraph.o EvaluationManager.o \
+	Const.hpp
 	$(CC) -o $@ $^
 
 Simulator.o: Simulator.cpp
@@ -36,7 +37,9 @@ EvaluationManager.cpp: EvaluationManager.hpp
 PhysicalNetwork.cpp: PhysicalNetwork.hpp
 
 # テスト関連
-test: mainTest.o RelationalGraphTest.o RelationalGraph.o PhysicalNetworkTest.o PhysicalNetwork.o
+test: mainTest.o RelationalGraphTest.o RelationalGraph.o \
+	PhysicalNetworkTest.o PhysicalNetwork.o \
+	Const.hpp
 	$(CC) -o $@ $^ $(GTEST_LIB)
 
 RelationalGraphTest.o: RelationalGraphTest.cpp

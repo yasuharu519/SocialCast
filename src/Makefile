@@ -15,8 +15,10 @@ SRC_DIR = $(PROJ_ROOT)/src
 SRCS        = main.cpp
 OBJS        = $(SRCS:.cpp=.o)
 
-main: Simulator.o RelationalGraph.o EvaluationManager.o \
-	Const.hpp UtilityFunctions.o
+MAIN_OBJ = RelationalGraph.o EventManager.o\
+		   Const.hpp UtilityFunctions.o PhysicalNetwork.o
+
+main: $(MAIN_OBJ) Simulator.o
 	$(CC) -o $@ $^
 
 Simulator.o: Simulator.cpp
@@ -25,7 +27,7 @@ Simulator.o: Simulator.cpp
 RelationalGraph.o: RelationalGraph.cpp
 	$(CC) -o $@ -c $^
 
-EvaluationManager.o: EvaluationManager.cpp
+EventManager.o: EventManager.cpp
 	$(CC) -o $@ -c $^
 
 PhysicalNetwork.o: PhysicalNetwork.cpp
@@ -36,14 +38,13 @@ UtilityFunctions.o: UtilityFunctions.cpp
 
 Simulator.cpp: Simulator.hpp
 RelationalGraph.cpp: RelationalGraph.hpp
-EvaluationManager.cpp: EvaluationManager.hpp
+EventManager.cpp: EventManager.hpp
 PhysicalNetwork.cpp: PhysicalNetwork.hpp
 UtilityFunctions.cpp: UtilityFunctions.hpp
 
 # テスト関連
-test: mainTest.o RelationalGraphTest.o RelationalGraph.o \
-	PhysicalNetworkTest.o PhysicalNetwork.o \
-	Const.hpp UtilityFunctions.o
+test: $(MAIN_OBJ) mainTest.o RelationalGraphTest.o \
+	PhysicalNetworkTest.o 
 	$(CC) -o $@ $^ $(GTEST_LIB)
 
 RelationalGraphTest.o: RelationalGraphTest.cpp

@@ -13,13 +13,11 @@ PhysicalNetwork::PhysicalNetwork()/*{{{*/
     int physicalID = 0;
     for(it = userList.begin(); it != userList.end(); ++it)
     {
-        succ.push_back(VertexList());
-        pred.push_back(VertexList());
+        neighbor.push_back(VertexList());
         registerIDMapping(physicalID, (*it));
         physicalID++;
     }
-    succ.push_back(VertexList());
-    pred.push_back(VertexList());
+    neighbor.push_back(VertexList());
     registerIDMapping(physicalID, distributorID);
     setRandomGeometricPosition();
     connectWithNeighbors();
@@ -36,27 +34,27 @@ PhysicalNetwork::~PhysicalNetwork()/*{{{*/
 ///////////////////////////////////////////////////////////////////////////////
 Edge PhysicalNetwork::add_edge(Vertex tail, Vertex head)/*{{{*/
 {
-    succ[tail].push_back(head);
-    pred[head].push_back(tail);
+    neighbor[tail].push_back(head);
+    neighbor[head].push_back(tail);
     return Edge(tail, head);
 }/*}}}*/
 
 bool PhysicalNetwork::checkConnectivity(){/*{{{*/
     // distributorから他のすべてのノードとの接続性を確認する
-    bool *f = new bool[userList.size() + 1]; // distributorIDは常に他のユーザ数+1
-    for(int j= 0; j < userList.size() + 1; j++){
+    bool *f = new bool[userPositionList.size()]; // distributorIDは常に他のユーザ数+1
+    for(int j= 0; j < userPositionList.size(); j++){
         f[j] = false;
     }
     queue<Vertex> q;
     q.push(relationalToPhysical[distributorID]);
+    int count = 0;
     while (!q.empty()) {
         int u;
         int physicalID;
         u = q.front(); q.pop();
-        physicalID = relationalToPhysical[u];
-        if (f[physicalID]) continue; 
-        f[physicalID] = true;
-        foreach (Vertex v, succ[u])
+        if (f[u]) continue; 
+        f[u] = true;
+        foreach (Vertex v, neighbor[u])
         {
             if (f[v] == false)
             {
@@ -66,9 +64,29 @@ bool PhysicalNetwork::checkConnectivity(){/*{{{*/
     }
     for(int i = 0; i < userList.size() + 1; ++i)
     {
-        if(f[i] == false) return false;
+        if(f[i] == false)
+        {
+            return false;
+        }
     }
     return true;
+}/*}}}*/
+
+void PhysicalNetwork::setPositionUntilAllConnected()/*{{{*/
+{
+    while(!checkConnectivity()){
+        // 位置情報のクリア
+        userPositionList.clear();
+        // 接続情報のクリア
+        for(int i = 0; i < neighbor.size(); ++i)
+        {
+            neighbor[i].clear();
+        }
+        // 再度場所の決定
+        setRandomGeometricPosition();
+        // 再度接続情報の更新
+        connectWithNeighbors();
+    }
 }/*}}}*/
 
 ///////////////////////////////////////////////////////////////////////////////

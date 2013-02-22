@@ -17,5 +17,6 @@ TEST_F(PhysicalNetworkTest, TestContentList){
 }
 
 TEST_F(PhysicalNetworkTest, TestConnectivity){
+    network->setPositionUntilAllConnected();
     EXPECT_EQ(true, network->checkConnectivity());
 }

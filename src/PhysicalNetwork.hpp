@@ -33,11 +33,12 @@ class PhysicalNetwork
         VertexList userList;
         VertexList contentList;
         UserPositionList userPositionList;
-        AdjacencyList succ, pred;
+        AdjacencyList neighbor;
         NodeIDMapping relationalToPhysical, physicalToRelational;
         //
         Edge add_edge(Vertex, Vertex);
         bool checkConnectivity();
+        void setPositionUntilAllConnected();
     private:
         int distributorID;
         //

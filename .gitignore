@@ -1,0 +1,7 @@
+NodeData
+build
+tools
+*.o
+src/oldpy
+src/test
+src/main

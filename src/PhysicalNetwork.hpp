@@ -17,6 +17,7 @@
 #include <complex>
 #include <queue>
 #include <algorithm>
+#include "UtilityFunctions.hpp"
 
 typedef int Vertex;
 typedef pair<double, double> Position;
@@ -41,14 +42,14 @@ class PhysicalNetwork
         NodeIDMapping relationalToPhysical, physicalToRelational;
         ShortestPathMap shortestPathMap;
         WeightProperty weight;
+        int distributorID;
         //
         Edge add_edge(Vertex, Vertex);
         bool checkConnectivity();
         void setPositionUntilAllConnected();
-        VertexList searchPhysicalShortestPath(const Vertex &node_from, const Vertex &node_to, const Content &content);
+        VertexList searchPhysicalShortestPath(const Vertex &node_from, const Vertex &node_to);
         int getUserNodeNum();
     private:
-        int distributorID;
         int userNodeNum;
         //
         void setRandomGeometricPosition();

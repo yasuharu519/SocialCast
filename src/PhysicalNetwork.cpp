@@ -94,7 +94,7 @@ void PhysicalNetwork::setPositionUntilAllConnected()/*{{{*/
     }
 }/*}}}*/
 
-VertexList PhysicalNetwork::searchPhysicalShortestPath(const Vertex &node_from, const Vertex &node_to, const Content &content)/*{{{*/
+VertexList PhysicalNetwork::searchPhysicalShortestPath(const Vertex &node_from, const Vertex &node_to)/*{{{*/
 {
     // TODO: 関係性グラフのほうの重みの計算について、どのようにしてるのか確認する
     // メモされているものから取り出す
@@ -135,10 +135,10 @@ VertexList PhysicalNetwork::searchPhysicalShortestPath(const Vertex &node_from, 
     return shortestPathMap[NodePair(node_from, node_to)];
 }/*}}}*/
 
-int PhysicalNetwork::getUserNodeNum()
+int PhysicalNetwork::getUserNodeNum()/*{{{*/
 {
     return userNodeNum;
-}
+}/*}}}*/
 
 ///////////////////////////////////////////////////////////////////////////////
 // Private
@@ -190,13 +190,14 @@ void PhysicalNetwork::registerIDMapping(const Vertex &physicalID, const Vertex &
 VertexList PhysicalNetwork::resolvePath(const int *prev, const Vertex &node_from, const Vertex &node_to)/*{{{*/
 {
     VertexList path;
-    Vertex u = node_from;
+    Vertex u = node_to;
     path.push_back(u);
-    while(u != node_to)
+    while(u != node_from)
     {
         u = prev[u];
         path.push_back(u);
     }
     reverse(path.begin(), path.end());
+    //UtilityFunctions::PrintVertexList(path);
     return path;
 }/*}}}*/

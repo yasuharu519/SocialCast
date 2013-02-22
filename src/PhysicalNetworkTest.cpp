@@ -20,3 +20,18 @@ TEST_F(PhysicalNetworkTest, TestConnectivity){
     network->setPositionUntilAllConnected();
     EXPECT_EQ(true, network->checkConnectivity());
 }
+
+TEST_F(PhysicalNetworkTest, TestShortestPath)
+{
+    int testID = network->relationalToPhysical[network->distributorID];
+    VertexList neighborOfDistributor = network->neighbor[testID];
+    VertexList *expectedList;
+    foreach(Vertex v, neighborOfDistributor)
+    {
+        expectedList = new VertexList();
+        expectedList->push_back(testID);
+        expectedList->push_back(v);
+        EXPECT_EQ(*expectedList, network->searchPhysicalShortestPath(testID, v));
+        delete expectedList;
+    }
+}

@@ -63,6 +63,7 @@ class EventManager{
         Event* popEvent();
         void clear();
         int size();
+        bool isEmpty();
     private:
         priority_queue<Event*, vector<Event*>, DereferenceCompareEvent > *eventQ;
         void clearItemsInQueue();

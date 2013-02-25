@@ -63,3 +63,13 @@ TEST_F(EventManagerTest, clearTest)/*{{{*/
     eventManager->clear();
     EXPECT_EQ(0, eventManager->size());
 }/*}}}*/
+
+TEST_F(EventManagerTest, isEmptyTest)/*{{{*/
+{
+    EXPECT_EQ(true, eventManager->isEmpty());
+    Event* event1 = new Event(100.0);
+    eventManager->addEvent(event1);
+    EXPECT_EQ(false, eventManager->isEmpty());
+    eventManager->clear();
+    EXPECT_EQ(true, eventManager->isEmpty());
+}/*}}}*/

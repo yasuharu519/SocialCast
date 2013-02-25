@@ -60,9 +60,9 @@ double Event::getEventTime() const
 ///////////////////////////////////////////////////////////////////////////////
 // EventManager
 ///////////////////////////////////////////////////////////////////////////////
-EventManager::EventManager(){
+EventManager::EventManager(){/*{{{*/
     eventQ = new priority_queue<Event*, vector<Event*>, DereferenceCompareEvent >();
-}
+}/*}}}*/
 
 EventManager::~EventManager(){/*{{{*/
     clearItemsInQueue();
@@ -92,6 +92,11 @@ void EventManager::clear()/*{{{*/
 int EventManager::size()/*{{{*/
 {
     return eventQ->size();
+}/*}}}*/
+
+bool EventManager::isEmpty()/*{{{*/
+{
+    return eventQ->empty() == true;
 }/*}}}*/
 
 // private

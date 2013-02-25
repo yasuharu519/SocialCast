@@ -16,7 +16,8 @@ SRCS        = main.cpp
 OBJS        = $(SRCS:.cpp=.o)
 
 MAIN_OBJ = RelationalGraph.o EventManager.o\
-		   Const.hpp UtilityFunctions.o PhysicalNetwork.o
+		   Const.hpp UtilityFunctions.o PhysicalNetwork.o\
+		   EvaluationManager.o
 
 main: $(MAIN_OBJ) Simulator.o
 	$(CC) -o $@ $^
@@ -36,11 +37,15 @@ PhysicalNetwork.o: PhysicalNetwork.cpp
 UtilityFunctions.o: UtilityFunctions.cpp
 	$(CC) -o $@ -c $^
 
+EvaluationManager.o: EvaluationManager.cpp
+	$(CC) -o $@ -c $^
+
 Simulator.cpp: Simulator.hpp
 RelationalGraph.cpp: RelationalGraph.hpp
 EventManager.cpp: EventManager.hpp
 PhysicalNetwork.cpp: PhysicalNetwork.hpp
 UtilityFunctions.cpp: UtilityFunctions.hpp
+EvaluationManager.cpp: EvaluationManager.hpp
 
 # テスト関連
 test: $(MAIN_OBJ) mainTest.o RelationalGraphTest.o \

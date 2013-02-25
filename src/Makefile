@@ -44,7 +44,7 @@ UtilityFunctions.cpp: UtilityFunctions.hpp
 
 # テスト関連
 test: $(MAIN_OBJ) mainTest.o RelationalGraphTest.o \
-	PhysicalNetworkTest.o 
+	PhysicalNetworkTest.o EventManagerTest.o
 	$(CC) -o $@ $^ $(GTEST_LIB)
 
 RelationalGraphTest.o: RelationalGraphTest.cpp
@@ -54,6 +54,9 @@ mainTest.o: mainTest.cpp
 	$(CC) -o $@ -c $^ $(GTEST_INCDIR)
 
 PhysicalNetworkTest.o: PhysicalNetworkTest.cpp
+	$(CC) -o $@ -c $^ $(GTEST_INCDIR)
+
+EventManagerTest.o: EventManagerTest.cpp
 	$(CC) -o $@ -c $^ $(GTEST_INCDIR)
 
 clean:

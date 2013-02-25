@@ -31,6 +31,9 @@ Vertex RelationalGraph::add_node(int node_id){/*{{{*/
 Edge RelationalGraph::add_edge(const Vertex &tail, const Vertex &head){/*{{{*/
     succ[tail].push_back(head);
     pred[head].push_back(tail);
+    // 双方向のため以下の追加
+    succ[head].push_back(tail);
+    pred[tail].push_back(head);
     return Edge(tail, head);
 }/*}}}*/
 
@@ -91,6 +94,15 @@ VertexList RelationalGraph::getUserList(){/*{{{*/
 VertexList RelationalGraph::getContentList(){/*{{{*/
     return contentList;
 }/*}}}*/
+
+//void RelationalGraph::setRank()
+//{
+    //vector<pair<int, double>> rank;
+    //for(int i = 0; i < nodeNum; ++i)
+    //{
+        
+    //}
+//}
 
 //////////////////////////////////////////////////////////////////////
 // Private

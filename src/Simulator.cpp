@@ -18,8 +18,6 @@ int main(int argc, char* argv[])
     }
     else
     {
-        strcpy(method, argv[1]); // メソッド名の格納
-        //if(strcmp(method, ""))
         
     }
 }

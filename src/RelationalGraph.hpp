@@ -27,44 +27,44 @@ typedef double Weight;
 typedef pair<Vertex, Vertex> NodePair;
 typedef map<NodePair, Weight> ShortestMap;
 
-template <class T> class EdgeProperty {
-    private:
-        int size;
-    public:
+template <class T> class EdgeProperty {/*{{{*/
+    private:/*{{{*/
+        int size;/*}}}*/
+    public:/*{{{*/
         T **w_array;
         map<Edge, T> w_map;
-        EdgeProperty() {
+        EdgeProperty() {/*{{{*/
             size = -1;
-        }
-        EdgeProperty(const int &n) {
+        }/*}}}*/
+        EdgeProperty(const int &n) {/*{{{*/
             w_array = new T*[n];
             for (int i = 0; i < n; ++i)
                 w_array[i] = new T[n];
                 size = n;
-            }
-        T& get(const Vertex &tail, const Vertex &head) {
+            }/*}}}*/
+        T& get(const Vertex &tail, const Vertex &head) {/*{{{*/
             if (size == -1) return w_map[Edge(tail, head)];
             else if (tail < size && head < size) return w_array[tail][head];
-        }
-        T& get(const Edge &e) {
+        }/*}}}*/
+        T& get(const Edge &e) {/*{{{*/
             return get(e.first, e.second);
-        }
-        T& operator[] (const Edge &e) {
+        }/*}}}*/
+        T& operator[] (const Edge &e) {/*{{{*/
             return get(e);
-        }
-        T operator() (const Edge &e) const {
+        }/*}}}*/
+        T operator() (const Edge &e) const {/*{{{*/
             return (*this)(e.first, e.second);
-        }
-        T operator() (const Vertex &tail, const Vertex &head) const {
+        }/*}}}*/
+        T operator() (const Vertex &tail, const Vertex &head) const {/*{{{*/
             if (size == -1) return w_map.find(Edge(tail, head))->second;
             else if (tail < size && head < size) return w_array[tail][head];
-        }
-};
+        }/*}}}*//*}}}*/
+};/*}}}*/
 
 typedef EdgeProperty<Weight> WeightProperty;
 
 class RelationalGraph{
-    public:
+    public:/*{{{*/
         RelationalGraph();
         virtual ~RelationalGraph();
         //
@@ -81,8 +81,8 @@ class RelationalGraph{
         double dijkstraShortestPathLength(const Vertex &node_from, const Vertex &node_to);
         int size();
         VertexList getUserList();
-        VertexList getContentList();
-    private:
+        VertexList getContentList();/*}}}*/
+    private:/*{{{*/
         int nodeNum;
         VertexList userList;
         VertexList contentList;
@@ -91,7 +91,7 @@ class RelationalGraph{
         void loadEdges();
         void loadVertexType();
         void setUserList();
-        void setContentList();
+        void setContentList();/*}}}*/
 };
 
 #endif

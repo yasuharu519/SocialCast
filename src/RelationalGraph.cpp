@@ -21,28 +21,28 @@ RelationalGraph::~RelationalGraph(){
 //////////////////////////////////////////////////////////////////////
 // Public
 //////////////////////////////////////////////////////////////////////
-Vertex RelationalGraph::add_node(int node_id){
+Vertex RelationalGraph::add_node(int node_id){/*{{{*/
     nodeNum++;
     succ.push_back(VertexList());
     pred.push_back(VertexList());
     return node_id;
-}
+}/*}}}*/
 
-Edge RelationalGraph::add_edge(const Vertex &tail, const Vertex &head){
+Edge RelationalGraph::add_edge(const Vertex &tail, const Vertex &head){/*{{{*/
     succ[tail].push_back(head);
     pred[head].push_back(tail);
     return Edge(tail, head);
-}
+}/*}}}*/
 
-string RelationalGraph::getLabel(int node_id){
+string RelationalGraph::getLabel(int node_id){/*{{{*/
     return labelMap[node_id];
-}
+}/*}}}*/
 
-Weight RelationalGraph::getEdgeWeight(const Vertex &tail, const Vertex &head){
+Weight RelationalGraph::getEdgeWeight(const Vertex &tail, const Vertex &head){/*{{{*/
     return weight(tail, head);
-}
+}/*}}}*/
 
-double RelationalGraph::dijkstraShortestPathLength(const Vertex &node_from, const Vertex &node_to){
+double RelationalGraph::dijkstraShortestPathLength(const Vertex &node_from, const Vertex &node_to){/*{{{*/
     ShortestMap::iterator it;
     it = shortestmap.find(NodePair(node_from, node_to));
     if(it != shortestmap.end()){
@@ -78,24 +78,24 @@ double RelationalGraph::dijkstraShortestPathLength(const Vertex &node_from, cons
         }
     }
     return shortestmap[NodePair(node_from, node_to)];
-}
+}/*}}}*/
 
-int RelationalGraph::size(){
+int RelationalGraph::size(){/*{{{*/
     return nodeNum;
-}
+}/*}}}*/
 
-VertexList RelationalGraph::getUserList(){
+VertexList RelationalGraph::getUserList(){/*{{{*/
     return userList;
-}
+}/*}}}*/
 
-VertexList RelationalGraph::getContentList(){
+VertexList RelationalGraph::getContentList(){/*{{{*/
     return contentList;
-}
+}/*}}}*/
 
 //////////////////////////////////////////////////////////////////////
 // Private
 //////////////////////////////////////////////////////////////////////
-void RelationalGraph::loadNodeLabel(){
+void RelationalGraph::loadNodeLabel(){/*{{{*/
     ifstream label_fs(RELATIONAL_GRAPH_NODENAME_FILEPATH);
     string label_buff;
     char label[1024];
@@ -110,9 +110,9 @@ void RelationalGraph::loadNodeLabel(){
             add_node(node_id);
         }
     }
-}
+}/*}}}*/
 
-void RelationalGraph::loadEdges(){
+void RelationalGraph::loadEdges(){/*{{{*/
     ifstream weight_fs(RELATIONAL_GRAPH_WEIGHT_FILEPATH);
     ifstream link_fs(RELATIONAL_GRAPH_LINK_FILEPATH);
     string weight_buff, link_buff;
@@ -125,9 +125,9 @@ void RelationalGraph::loadEdges(){
         weight[add_edge(node_from, node_to)] = link_weight;
         weight[add_edge(node_to, node_from)] = link_weight;
     }
-}
+}/*}}}*/
 
-void RelationalGraph::loadVertexType(){
+void RelationalGraph::loadVertexType(){/*{{{*/
     ifstream type_fs(RELATIONAL_GRAPH_NODETYPE_FILEPATH);
     string type_buff;
     int type;
@@ -136,22 +136,22 @@ void RelationalGraph::loadVertexType(){
         sscanf(type_buff.data(), "%d %d", &node_id, &type);
         vertexTypeMap[node_id] = type;
     }
-}
+}/*}}}*/
 
-void RelationalGraph::setUserList(){
+void RelationalGraph::setUserList(){/*{{{*/
     VertexTypeMap::iterator it;
     for(it = vertexTypeMap.begin(); it != vertexTypeMap.end(); ++it){
         if(it->second == 0){
             userList.push_back(it->first);
         }
     }
-}
+}/*}}}*/
 
-void RelationalGraph::setContentList(){
+void RelationalGraph::setContentList(){/*{{{*/
     VertexTypeMap::iterator it;
     for(it = vertexTypeMap.begin(); it != vertexTypeMap.end(); ++it){
         if(it->second == 1){
             contentList.push_back(it->first);
         }
     }
-}
+}/*}}}*/

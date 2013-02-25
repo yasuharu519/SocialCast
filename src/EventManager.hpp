@@ -19,7 +19,6 @@ using namespace std;
 typedef int Vertex;
 typedef int Content;
 
-// Comparator
 
 class Event{
     public:
@@ -45,6 +44,7 @@ class ReceivePacketEvent: public Event{
 };
 
 
+// Comparator
 struct DereferenceCompareEvent : public binary_function<Event*, Event*, bool>/*{{{*/
 {
     bool operator()(const Event* lhs, const Event* rhs) const

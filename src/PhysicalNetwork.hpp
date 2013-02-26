@@ -32,7 +32,7 @@ using namespace std;
 class PhysicalNetwork
 {
     public:
-        PhysicalNetwork();
+        PhysicalNetwork(RelationalGraph* graph);
         virtual ~PhysicalNetwork();
         //
         VertexList userList;

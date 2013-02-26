@@ -1,9 +1,11 @@
 #include "gtest/gtest.h"
 #include "PhysicalNetwork.hpp"
+#include "RelationalGraph.hpp"
 
 class PhysicalNetworkTest: public ::testing::Test{
     public:
-        PhysicalNetwork* network = new PhysicalNetwork();
+        RelationalGraph* graph = new RelationalGraph();
+        PhysicalNetwork* network = new PhysicalNetwork(graph);
 };
 
 

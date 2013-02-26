@@ -1,12 +1,10 @@
 #include "PhysicalNetwork.hpp"
 
-
 ///////////////////////////////////////////////////////////////////////////////
 // Constructor/Destructor
 ///////////////////////////////////////////////////////////////////////////////
-PhysicalNetwork::PhysicalNetwork()/*{{{*/
+PhysicalNetwork::PhysicalNetwork(RelationalGraph* graph)/*{{{*/
 {
-    RelationalGraph* graph = new RelationalGraph();
     userList = graph->getUserList();
     contentList = graph->getContentList();
     distributorID = graph->size();
@@ -22,7 +20,6 @@ PhysicalNetwork::PhysicalNetwork()/*{{{*/
     registerIDMapping(physicalID, distributorID);
     setRandomGeometricPosition();
     connectWithNeighbors();
-    delete graph;
     userNodeNum = userPositionList.size();
 } /*}}}*/
 

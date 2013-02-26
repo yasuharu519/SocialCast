@@ -3,8 +3,10 @@
 ///////////////////////////////////////////////////////////////////////////////
 // Constructor/Destructor
 ///////////////////////////////////////////////////////////////////////////////
-PhysicalNetwork::PhysicalNetwork(RelationalGraph* graph)/*{{{*/
+PhysicalNetwork::PhysicalNetwork(RelationalGraph* graph, EvaluationManager* _evaluationManager)/*{{{*/
 {
+    evaluationManager = _evaluationManager;
+    relationalGraph = graph;
     userList = graph->getUserList();
     contentList = graph->getContentList();
     distributorID = graph->size();
@@ -14,10 +16,14 @@ PhysicalNetwork::PhysicalNetwork(RelationalGraph* graph)/*{{{*/
     {
         neighbor.push_back(VertexList());
         registerIDMapping(physicalID, (*it));
+        physicalNodeIDList.push_back(physicalID);
         physicalID++;
     }
+    // Distributorの分の登録
     neighbor.push_back(VertexList());
     registerIDMapping(physicalID, distributorID);
+    physicalNodeIDList.push_back(physicalID);
+    // 
     setRandomGeometricPosition();
     connectWithNeighbors();
     userNodeNum = userPositionList.size();
@@ -137,6 +143,80 @@ int PhysicalNetwork::getUserNodeNum()/*{{{*/
     return userNodeNum;
 }/*}}}*/
 
+VertexList PhysicalNetwork::getPhysicalNodeIDList()/*{{{*/
+{
+    return physicalNodeIDList;
+}/*}}}*/
+
+bool sortIDAndPossibilityPair(const pair<int, double> &a, const pair<int, double> &b)
+{
+    return a.second < b.second;
+}
+
+Content PhysicalNetwork::chooseRequestContent(Vertex _physicalID)
+{
+    // randの設定
+    using namespace boost;
+    mt19937 gen( static_cast<unsigned long>(time(0)) );
+    uniform_real<> dst( 0, 1);
+    variate_generator<mt19937&, uniform_real<> > rand( gen, dst );
+    // 使用する変数
+    vector<pair<int, double> > IDAndShortestPathLength;
+    vector<pair<int, double> > IDAndPossibilityPairList;
+    pair<int, double> item;
+    double length;
+    double sum_length;
+    double accum;
+    double before;
+    // 入力はphysicalID
+    int relationalID = physicalToRelational[_physicalID];
+    // すでに計算しているかcheck
+    ContentsRequestPossibilityMap::iterator it = contentsRequestPossibilityMap.find(relationalID);
+    if(it == contentsRequestPossibilityMap.end()) // メモ化が見つからなかった場合
+    {
+        sum_length = 0;
+        VertexList contentsIDList = relationalGraph->getLinkedContentsIDListOfUser(relationalID);
+        // 最短路長の計算
+        for(int i = 0; i < contentsIDList.size(); ++i)
+        {
+            length = relationalGraph->dijkstraShortestPathLength(relationalID, contentsIDList[i]);
+            sum_length += length;
+            IDAndShortestPathLength.push_back(pair<int, double>(contentsIDList[i], length));
+        }
+        // 総合経路長から、最短経路長の割合を計算
+        for(int i = 0; i < IDAndShortestPathLength.size(); ++i)
+        {
+            item = IDAndShortestPathLength[i];
+            IDAndPossibilityPairList.push_back(pair<int, double>(item.first, item.second / sum_length));
+        }
+        // 割合の長さでソート
+        sort(IDAndPossibilityPairList.begin(), IDAndPossibilityPairList.end(), sortIDAndPossibilityPair);
+        // 割合から確立に変換
+        accum = 0;
+        for(int i = 0; i < IDAndPossibilityPairList.size(); ++i)
+        {
+            before = IDAndPossibilityPairList[i].second;
+            IDAndPossibilityPairList[i].second += accum;
+            accum += before;
+        }
+        // メモに登録
+        contentsRequestPossibilityMap[relationalID] = IDAndPossibilityPairList;
+    }
+    else
+    {
+        IDAndPossibilityPairList = it->second;
+    }
+    double rand_num = rand();
+    for(int i = 0; i < IDAndPossibilityPairList.size(); ++i)
+    {
+        if(rand_num < IDAndPossibilityPairList[i].second)
+        {
+            return IDAndPossibilityPairList[i].first;
+        }
+    }
+    return IDAndPossibilityPairList[IDAndPossibilityPairList.size() - 1].first;
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // Private
 ///////////////////////////////////////////////////////////////////////////////
@@ -198,3 +278,4 @@ VertexList PhysicalNetwork::resolvePath(const int *prev, const Vertex &node_from
     //UtilityFunctions::PrintVertexList(path);
     return path;
 }/*}}}*/
+

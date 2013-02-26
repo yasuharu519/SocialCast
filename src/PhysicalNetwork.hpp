@@ -18,6 +18,7 @@
 #include <queue>
 #include <algorithm>
 #include "UtilityFunctions.hpp"
+#include "EvaluationManager.hpp"
 
 typedef int Vertex;
 typedef pair<double, double> Position;
@@ -26,13 +27,14 @@ typedef vector<UserPosition> UserPositionList;
 typedef map<Vertex, Vertex> NodeIDMapping;
 typedef map<NodePair, VertexList> ShortestPathMap;
 typedef Vertex Content;
+typedef map<Vertex, vector<pair<Vertex, double>>> ContentsRequestPossibilityMap;
 
 using namespace std;
 
 class PhysicalNetwork
 {
     public:
-        PhysicalNetwork(RelationalGraph* graph);
+        PhysicalNetwork(RelationalGraph* graph, EvaluationManager* _evaluationManager);
         virtual ~PhysicalNetwork();
         //
         VertexList userList;
@@ -49,8 +51,14 @@ class PhysicalNetwork
         void setPositionUntilAllConnected();
         VertexList searchPhysicalShortestPath(const Vertex &node_from, const Vertex &node_to);
         int getUserNodeNum();
+        VertexList getPhysicalNodeIDList();
+        Content chooseRequestContent(Vertex _physicalID);
     private:
         int userNodeNum;
+        RelationalGraph* relationalGraph;
+        EvaluationManager* evaluationManager;
+        VertexList physicalNodeIDList;
+        ContentsRequestPossibilityMap contentsRequestPossibilityMap;
         //
         void setRandomGeometricPosition();
         void connectWithNeighbors();

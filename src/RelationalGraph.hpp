@@ -86,6 +86,7 @@ class RelationalGraph{
         VertexList getContentList();/*}}}*/
         void setRank();
         int getRank(int _id);
+        VertexList getLinkedContentsIDListOfUser(Vertex _userID);
     private:/*{{{*/
         int nodeNum;
         VertexList userList;

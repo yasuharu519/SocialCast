@@ -141,6 +141,19 @@ int RelationalGraph::getRank(int _id)
     }
 }
 
+VertexList RelationalGraph::getLinkedContentsIDListOfUser(Vertex _userID)
+{
+    VertexList contentsIDList;
+    for(int i = 0; i < succ[_userID].size(); ++i)
+    {
+        if(vertexTypeMap[succ[_userID][i]] == 1)
+        {
+            contentsIDList.push_back(succ[_userID][i]);
+        }
+    }
+    return contentsIDList;
+}
+
 //////////////////////////////////////////////////////////////////////
 // Private
 //////////////////////////////////////////////////////////////////////

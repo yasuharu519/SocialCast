@@ -26,6 +26,7 @@ typedef vector<VertexList> AdjacencyList;
 typedef double Weight;
 typedef pair<Vertex, Vertex> NodePair;
 typedef map<NodePair, Weight> ShortestMap;
+typedef map<Vertex, int> RankMap;
 
 template <class T> class EdgeProperty {/*{{{*/
     private:/*{{{*/
@@ -73,6 +74,7 @@ class RelationalGraph{
         VertexTypeMap vertexTypeMap;
         WeightProperty weight;
         ShortestMap shortestmap;
+        RankMap rankMap;
         //
         Vertex add_node(int node_id);
         Edge add_edge(const Vertex &tail, const Vertex &head);
@@ -83,6 +85,7 @@ class RelationalGraph{
         VertexList getUserList();
         VertexList getContentList();/*}}}*/
         void setRank();
+        int getRank(int _id);
     private:/*{{{*/
         int nodeNum;
         VertexList userList;

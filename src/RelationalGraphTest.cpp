@@ -1,5 +1,7 @@
 #include "gtest/gtest.h"
 #include "RelationalGraph.hpp"
+#include "algorithm"
+#include "UtilityFunctions.hpp"
 
 class RelationalGraphTest: public ::testing::Test{
     public:
@@ -93,5 +95,64 @@ TEST_F(RelationalGraphTest, TestLinkNumberCheck)
         succ_num = graph->succ[i].size();
         EXPECT_EQ(pred_num, succ_num);
     }
+
+}
+
+TEST_F(RelationalGraphTest, TestRankIsSetForAllContents)
+{
+    // すべてのコンテンツに対してランクが設定されているか
+    VertexList contentsList = graph->getContentList();
+    int _id, rank;
+    for(int i = 0; i < contentsList.size(); ++i)
+    {
+        _id = contentsList[i];
+        rank = graph->getRank(_id);
+        EXPECT_NE(-1, rank);
+    }
+}
+
+bool rankSortLess(const pair<int, int>&a, const pair<int, int>&b)
+{
+    return a.second < b.second;
+}
+
+TEST_F(RelationalGraphTest, TestRankOrder)
+{
+    using namespace std;
+    // コンテンツのランクのオーダーを調べる
+    vector<pair<int, int> > IDAndRank;
+    VertexList contentList = graph->getContentList();
+    int rank;
+    int link_count;
+    int contentID;
+    bool result = true;
+    for(int i = 0; i < contentList.size(); ++i)
+    {
+        rank = graph->getRank(contentList[i]);
+        IDAndRank.push_back(pair<int, int>(contentList[i], rank));
+    }
+    sort(IDAndRank.begin(), IDAndRank.end(), rankSortLess);
+    vector<int> linkNumList;
+    for(int i = 0; i < IDAndRank.size(); ++i)
+    {
+        link_count = 0;
+        contentID = IDAndRank[i].first;
+        for(int j = 0; j < graph->succ[contentID].size(); ++j)
+        {
+            if(graph->vertexTypeMap[graph->succ[contentID][j]] == 0 )// ユーザであることを確かめる
+            {
+                ++link_count;
+            }
+        }
+        linkNumList.push_back(link_count);
+    }
+    for(int i = 0; i < linkNumList.size() - 1; ++i)
+    {
+        if(linkNumList[i] < linkNumList[i+1])
+        {
+            result = false;
+        }
+    }
+    EXPECT_EQ(true, result);
 
 }

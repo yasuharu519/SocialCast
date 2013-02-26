@@ -13,6 +13,7 @@ RelationalGraph::RelationalGraph(){
     loadVertexType();
     setUserList();
     setContentList();
+    setRank();
 }
 
 RelationalGraph::~RelationalGraph(){
@@ -95,7 +96,7 @@ VertexList RelationalGraph::getContentList(){/*{{{*/
     return contentList;
 }/*}}}*/
 
-bool rankSort(const pair<long, long> &a, const pair<long, long> &b)
+bool linkNumSortGreater(const pair<long, long> &a, const pair<long, long> &b)
 {
     return a.second > b.second;
 }
@@ -103,11 +104,41 @@ bool rankSort(const pair<long, long> &a, const pair<long, long> &b)
 void RelationalGraph::setRank()
 {
     vector<pair<long, long> > rank;
-    for(int i = 0; i < nodeNum; ++i)
+    pair<long, long> item;
+    int link_count;
+    VertexList::iterator it;
+    for(it = contentList.begin(); it != contentList.end(); ++it)
     {
-        rank.push_back(pair<long, long>(i, succ[i].size()));
+        link_count = 0;
+        for(int j = 0; j < succ[(*it)].size(); ++j)
+        {
+            if(vertexTypeMap[succ[(*it)][j]] == 0) // ユーザであることを確かめる
+            {
+                ++link_count;
+            }
+        }
+        rank.push_back(pair<long, long>((*it), link_count));
     }
-    sort(rank.begin(), rank.end(), rankSort);
+    sort(rank.begin(), rank.end(), linkNumSortGreater);
+    for(int i = 0; i < rank.size(); ++i)
+    {
+        item = rank[i];
+        rankMap[item.first] = i+1;
+    }
+}
+
+int RelationalGraph::getRank(int _id)
+{
+    RankMap::iterator it;
+    it = rankMap.find(_id);
+    if(it != rankMap.end())
+    {
+        return it->second;
+    }
+    else
+    {
+        return -1;
+    }
 }
 
 //////////////////////////////////////////////////////////////////////

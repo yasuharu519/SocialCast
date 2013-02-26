@@ -95,14 +95,20 @@ VertexList RelationalGraph::getContentList(){/*{{{*/
     return contentList;
 }/*}}}*/
 
-//void RelationalGraph::setRank()
-//{
-    //vector<pair<int, double>> rank;
-    //for(int i = 0; i < nodeNum; ++i)
-    //{
-        
-    //}
-//}
+bool rankSort(const pair<long, long> &a, const pair<long, long> &b)
+{
+    return a.second > b.second;
+}
+
+void RelationalGraph::setRank()
+{
+    vector<pair<long, long> > rank;
+    for(int i = 0; i < nodeNum; ++i)
+    {
+        rank.push_back(pair<long, long>(i, succ[i].size()));
+    }
+    sort(rank.begin(), rank.end(), rankSort);
+}
 
 //////////////////////////////////////////////////////////////////////
 // Private

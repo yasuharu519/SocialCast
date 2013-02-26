@@ -42,7 +42,7 @@ TEST_F(RelationalGraphTest, TestGetContentList){
     EXPECT_EQ(5209, graph->getContentList().size());
 }
 
-TEST_F(RelationalGraphTest, TestLinkTest)
+TEST_F(RelationalGraphTest, TestLinkBidirectional)/*{{{*/
 {
     int size = graph->size();
     graph->add_node(size);
@@ -79,5 +79,19 @@ TEST_F(RelationalGraphTest, TestLinkTest)
     EXPECT_EQ(true, flag2);
     EXPECT_EQ(true, flag3);
     EXPECT_EQ(true, flag4);
-}
+}/*}}}*/
 
+TEST_F(RelationalGraphTest, TestLinkNumberCheck)
+{
+    // リンクの数が、predとsuccでおなじかどうか確かめる
+    // check bidirectionary
+    int size = graph->size();
+    int pred_num, succ_num;
+    for(int i = 0; i < size; ++i)
+    {
+        pred_num = graph->pred[i].size();
+        succ_num = graph->succ[i].size();
+        EXPECT_EQ(pred_num, succ_num);
+    }
+
+}

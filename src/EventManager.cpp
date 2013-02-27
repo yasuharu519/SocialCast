@@ -22,39 +22,39 @@ double Event::getEventTime() const
 ///////////////////////////////////////////////////////////////////////////////
 // ContentRequestedEvent
 ///////////////////////////////////////////////////////////////////////////////
-//ContentRequestedEvent::ContentRequestedEvent(){
+ContentRequestedEvent::ContentRequestedEvent(double _time):Event(_time){
 
-//}
+}
 
-//ContentRequestedEvent::~ContentRequestedEvent(){
+ContentRequestedEvent::~ContentRequestedEvent(){
 
-//}
+}
 
 
 // ------------------------------------------------------------------------- //
 ///////////////////////////////////////////////////////////////////////////////
 // SendPacketEvent
 ///////////////////////////////////////////////////////////////////////////////
-//SendPacketEvent::SendPacketEvent(){
+SendPacketEvent::SendPacketEvent(double _time):Event(_time){
 
-//}
+}
 
-//SendPacketEvent::~SendPacketEvent(){
+SendPacketEvent::~SendPacketEvent(){
 
-//}
+}
 
 
 // ------------------------------------------------------------------------- //
 ///////////////////////////////////////////////////////////////////////////////
 // ReceivePacketEvent
 ///////////////////////////////////////////////////////////////////////////////
-//ReceivePacketEvent::ReceivePacketEvent(double _time):Event(_time){
+ReceivePacketEvent::ReceivePacketEvent(double _time):Event(_time){
 
-//}
+}
 
-//ReceivePacketEvent::~ReceivePacketEvent(){
+ReceivePacketEvent::~ReceivePacketEvent(){
 
-//}
+}
 
 // ------------------------------------------------------------------------- //
 ///////////////////////////////////////////////////////////////////////////////

@@ -35,12 +35,21 @@ class Event{
 };
 
 class ContentRequestedEvent: public Event{
+    public:
+        ContentRequestedEvent(double _time);
+        ~ContentRequestedEvent();
 };
 
 class SendPacketEvent: public Event{
+    public:
+        SendPacketEvent(double _time);
+        ~SendPacketEvent();
 };
 
 class ReceivePacketEvent: public Event{
+    public:
+        ReceivePacketEvent(double _time);
+        ~ReceivePacketEvent();
 };
 
 

@@ -9,10 +9,10 @@ using namespace std;
 // Simulator Class
 Simulator::Simulator()
 {
-    EvaluationManager* evaluationManager = new EvaluationManager();
-    RelationalGraph* relationalGraph = new RelationalGraph();
-    PhysicalNetwork* physicalNetwork = new PhysicalNetwork(relationalGraph, evaluationManager);
-    physicalNodeIDList = physicalNetwork->getPhysicalNodeIDList();
+    evaluationManager = new EvaluationManager();
+    relationalGraph = new RelationalGraph();
+    physicalNetwork = new PhysicalNetwork(relationalGraph, evaluationManager);
+    eventManager = new EventManager();
 }
 
 Simulator::~Simulator()
@@ -20,12 +20,51 @@ Simulator::~Simulator()
     delete evaluationManager;
     delete relationalGraph;
     delete physicalNetwork;
+    delete eventManager;
 }
 
 // public functions
 void Simulator::doSimulation()
 {
-    
+    // 最初のイベントの追加
+    Event* event = new ContentRequestedEvent(0.0);
+    double time;
+    while(!(eventManager->isEmpty()))
+    {
+        event = eventManager->popEvent();
+        if(typeid(event) == typeid(ContentRequestedEvent))
+        {
+            doContentRequest();
+        }
+        else if(typeid(event) == typeid(ReceivePacketEvent))
+        {
+            doReceivePacket();
+        }
+        else if(typeid(event) == typeid(SendPacketEvent))
+        {
+            doSendPacket();
+        }
+        else{
+            cout << "Error: Event class should not be in eventManager" << endl;
+            std::abort();
+        }
+        delete event;
+    }
+}
+
+void Simulator::doContentRequest()
+{
+
+}
+
+void Simulator::doReceivePacket()
+{
+
+}
+
+void Simulator::doSendPacket()
+{
+
 }
 
 // private functions
@@ -44,7 +83,9 @@ int main(int argc, char* argv[])
     }
     else
     {
-        
+        Simulator* simulator = new Simulator();
+        simulator->doSimulation();
+        delete simulator;
     }
 }
 

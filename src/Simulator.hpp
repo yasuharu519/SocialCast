@@ -12,6 +12,7 @@
 #include "PhysicalNetwork.hpp"
 #include "RelationalGraph.hpp"
 #include "EvaluationManager.hpp"
+#include "EventManager.hpp"
 
 class Simulator
 {
@@ -20,13 +21,16 @@ class Simulator
         virtual ~Simulator();
         //
         void doSimulation();
+        // 各イベントごとの処理
+        void doContentRequest();
+        void doReceivePacket();
+        void doSendPacket();
     private:
         EvaluationManager* evaluationManager;
         RelationalGraph* relationalGraph;
         PhysicalNetwork* physicalNetwork;
-        VertexList physicalNodeIDList;
+        EventManager* eventManager;
         //
-        Vertex chooseContentRequestedUser();
 
 };
 

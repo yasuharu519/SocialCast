@@ -148,12 +148,12 @@ VertexList PhysicalNetwork::getPhysicalNodeIDList()/*{{{*/
     return physicalNodeIDList;
 }/*}}}*/
 
-bool sortIDAndPossibilityPair(const pair<int, double> &a, const pair<int, double> &b)
+bool sortIDAndPossibilityPair(const pair<int, double> &a, const pair<int, double> &b)/*{{{*/
 {
     return a.second < b.second;
-}
+}/*}}}*/
 
-Content PhysicalNetwork::chooseRequestContent(Vertex _physicalID)
+Content PhysicalNetwork::chooseRequestContent(Vertex _physicalID)/*{{{*/
 {
     // randの設定
     using namespace boost;
@@ -161,8 +161,8 @@ Content PhysicalNetwork::chooseRequestContent(Vertex _physicalID)
     uniform_real<> dst( 0, 1);
     variate_generator<mt19937&, uniform_real<> > rand( gen, dst );
     // 使用する変数
-    vector<pair<int, double> > IDAndShortestPathLength;
-    vector<pair<int, double> > IDAndPossibilityPairList;
+    RequestPossibilityList IDAndShortestPathLength;
+    RequestPossibilityList IDAndPossibilityPairList;
     pair<int, double> item;
     double length;
     double sum_length;
@@ -181,7 +181,7 @@ Content PhysicalNetwork::chooseRequestContent(Vertex _physicalID)
         {
             length = relationalGraph->dijkstraShortestPathLength(relationalID, contentsIDList[i]);
             sum_length += length;
-            IDAndShortestPathLength.push_back(pair<int, double>(contentsIDList[i], length));
+            IDAndShortestPathLength.push_back(pair<Vertex, double>(contentsIDList[i], length));
         }
         // 総合経路長から、最短経路長の割合を計算
         for(int i = 0; i < IDAndShortestPathLength.size(); ++i)
@@ -215,6 +215,21 @@ Content PhysicalNetwork::chooseRequestContent(Vertex _physicalID)
         }
     }
     return IDAndPossibilityPairList[IDAndPossibilityPairList.size() - 1].first;
+}/*}}}*/
+
+RequestPossibilityList PhysicalNetwork::getRequestPossibilityList(Vertex _physicalID)
+{
+    int relationalID = physicalToRelational[_physicalID];
+    ContentsRequestPossibilityMap::iterator it = contentsRequestPossibilityMap.find(relationalID);
+    RequestPossibilityList possibilityList;
+    if(it != contentsRequestPossibilityMap.end())
+    {
+        return it->second;
+    }
+    else
+    {
+        return possibilityList;
+    }
 }
 
 ///////////////////////////////////////////////////////////////////////////////

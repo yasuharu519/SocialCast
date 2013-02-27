@@ -1,11 +1,13 @@
 #include "gtest/gtest.h"
 #include "PhysicalNetwork.hpp"
 #include "RelationalGraph.hpp"
+#include "EvaluationManager.hpp"
 
 class PhysicalNetworkTest: public ::testing::Test{
     public:
         RelationalGraph* graph = new RelationalGraph();
-        PhysicalNetwork* network = new PhysicalNetwork(graph);
+        EvaluationManager* evaluationManager = new EvaluationManager();
+        PhysicalNetwork* network = new PhysicalNetwork(graph, evaluationManager);
 };
 
 
@@ -36,4 +38,32 @@ TEST_F(PhysicalNetworkTest, TestShortestPath)
         EXPECT_EQ(*expectedList, network->searchPhysicalShortestPath(testID, v));
         delete expectedList;
     }
+}
+
+TEST_F(PhysicalNetworkTest, TestChooseRequestContentIsActuallyContentFromAllUserNode)
+{
+    int selectedContent;
+    for(int i = 0; i < (network->getUserNodeNum() - 1); ++i)
+    {
+        selectedContent = network->chooseRequestContent(i);
+        EXPECT_EQ(1, graph->vertexTypeMap[selectedContent]);
+    }
+}
+
+TEST_F(PhysicalNetworkTest, TestChooseRequestContentCacheWillBeAdded)
+{
+    RequestPossibilityList possibilityList = network->getRequestPossibilityList(0);
+    EXPECT_EQ(0, possibilityList.size());
+    int selectedContent = network->chooseRequestContent(0);
+    possibilityList = network->getRequestPossibilityList(0);
+    EXPECT_NE(0, possibilityList.size());
+    bool flag = true;
+    for(int i = 0; i < possibilityList.size() - 1; ++i)
+    {
+        if(possibilityList[i].second > possibilityList[i+1].second)
+        {
+            flag = false;
+        }
+    }
+    EXPECT_EQ(true, flag);
 }

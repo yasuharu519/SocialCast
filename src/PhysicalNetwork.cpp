@@ -152,7 +152,9 @@ Content PhysicalNetwork::chooseRequestContent(Vertex _physicalID)/*{{{*/
 {
     // randの設定
     using namespace boost;
-    mt19937 gen( static_cast<unsigned long>(time(0)) );
+    random_device myseed;
+    //mt19937 gen( static_cast<unsigned long>(time(0)) );
+    mt19937 gen(static_cast<unsigned long>(myseed()));
     uniform_real<> dst( 0, 1);
     variate_generator<mt19937&, uniform_real<> > rand( gen, dst );
     // 使用する変数
@@ -176,6 +178,17 @@ Content PhysicalNetwork::chooseRequestContent(Vertex _physicalID)/*{{{*/
     return IDAndPossibilityPairList[IDAndPossibilityPairList.size() - 1].first;
 }/*}}}*/
 
+Vertex PhysicalNetwork::chooseRequestUser()
+{
+    using namespace boost;
+    random_device myseed;
+    //mt19937 gen(static_cast<unsigned long>(time(0)));
+    mt19937 gen(static_cast<unsigned long>(myseed()));
+    uniform_int<> dst(0, physicalNodeIDList.size()-2); // 最後のIDはdistributorとなっているため
+    variate_generator<mt19937&, uniform_int<> > rand(gen, dst);
+    
+    return rand();
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 // Private

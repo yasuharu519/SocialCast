@@ -5,10 +5,26 @@
 
 class PhysicalNetworkTest: public ::testing::Test{
     public:
-        RelationalGraph* graph = new RelationalGraph();
-        EvaluationManager* evaluationManager = new EvaluationManager();
-        PhysicalNetwork* network = new PhysicalNetwork(graph, evaluationManager);
+        PhysicalNetworkTest();
+        ~PhysicalNetworkTest();
+        RelationalGraph* graph;
+        EvaluationManager* evaluationManager;
+        PhysicalNetwork* network;
 };
+
+PhysicalNetworkTest::PhysicalNetworkTest()
+{
+    graph = new RelationalGraph();
+    evaluationManager = new EvaluationManager();
+    network = new PhysicalNetwork(graph, evaluationManager);
+}
+
+PhysicalNetworkTest::~PhysicalNetworkTest()
+{
+    delete graph;
+    delete evaluationManager;
+    delete network;
+}
 
 
 //constructor

@@ -5,9 +5,20 @@
 
 class RelationalGraphTest: public ::testing::Test{
     public:
-        RelationalGraph* graph = new RelationalGraph();
+        RelationalGraph* graph;
+        RelationalGraphTest();
+        ~RelationalGraphTest();
 };
 
+RelationalGraphTest::RelationalGraphTest()
+{
+    graph = new RelationalGraph();
+}
+
+RelationalGraphTest::~RelationalGraphTest()
+{
+    delete graph;
+}
 
 //getEdgeWeight
 TEST_F(RelationalGraphTest, TestGetEdgeWeight){

@@ -29,15 +29,6 @@ void Simulator::doSimulation()
 }
 
 // private functions
-Vertex Simulator::chooseContentRequestedUser()
-{
-    using namespace boost;
-    mt19937 gen(static_cast<unsigned long>(time(0)));
-    uniform_smallint<> dst(0, physicalNodeIDList.size()-2); // 最後のIDはdistributorとなっているため
-    variate_generator<mt19937&, uniform_smallint<> > rand(gen, dst);
-    
-    return rand();
-}
 
 
 int main(int argc, char* argv[])

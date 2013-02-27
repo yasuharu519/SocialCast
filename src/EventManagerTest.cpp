@@ -3,8 +3,21 @@
 
 class EventManagerTest: public ::testing::Test{
     public:
-        EventManager* eventManager = new EventManager();
+        EventManagerTest();
+        ~EventManagerTest();
+        EventManager* eventManager;
 };
+
+EventManagerTest::EventManagerTest()
+{
+    eventManager = new EventManager();
+}
+
+EventManagerTest::~EventManagerTest()
+{
+    delete eventManager;
+
+}
 
 
 //getEdgeWeight
@@ -69,7 +82,8 @@ TEST_F(EventManagerTest, isEmptyTest)/*{{{*/
     EXPECT_EQ(true, eventManager->isEmpty());
     Event* event1 = new Event(100.0);
     eventManager->addEvent(event1);
-    EXPECT_EQ(false, eventManager->isEmpty());
+    EXPECT_NE(true, eventManager->isEmpty());
+    //EXPECT_EQ(1, eventManager->isEmpty());
     eventManager->clear();
     EXPECT_EQ(true, eventManager->isEmpty());
 }/*}}}*/

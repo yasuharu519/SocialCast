@@ -69,6 +69,7 @@ double RelationalGraph::dijkstraShortestPathLength(const Vertex &node_from, cons
         if (f[u]) continue; 
         f[u] = true;
         shortestmap[NodePair(node_from, u)] = dist[u];
+        shortestmap[NodePair(u, node_from)] = dist[u]; // 両方向対応
         if(node_to == u){
             //return shortestmap[NodePair(node_from, node_to)];
             return dist[u];

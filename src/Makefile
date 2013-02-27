@@ -4,7 +4,7 @@ CC = g++
 RM = rm -f
 
 LDFLAGS =
-CXXFLAGSS =
+CXXFLAGSS= -O3
 
 GTEST_INCDIR    = -I$(PROJ_ROOT)/tools/include
 GTEST_LIB   = $(PROJ_ROOT)/tools/lib/gtest_main.a
@@ -20,25 +20,25 @@ MAIN_OBJ = RelationalGraph.o EventManager.o\
 		   EvaluationManager.o
 
 main: $(MAIN_OBJ) Simulator.o
-	$(CC) -o $@ $^
+	$(CC) $(CXXFLAGSS) -o $@ $^
 
 Simulator.o: Simulator.cpp
-	$(CC) -o $@ -c $^
+	$(CC) $(CXXFLAGSS) -o $@ -c $^
 
 RelationalGraph.o: RelationalGraph.cpp
-	$(CC) -o $@ -c $^
+	$(CC) $(CXXFLAGSS) -o $@ -c $^
 
 EventManager.o: EventManager.cpp
-	$(CC) -o $@ -c $^
+	$(CC) $(CXXFLAGSS) -o $@ -c $^
 
 PhysicalNetwork.o: PhysicalNetwork.cpp
-	$(CC) -o $@ -c $^
+	$(CC) $(CXXFLAGSS) -o $@ -c $^
 
 UtilityFunctions.o: UtilityFunctions.cpp
-	$(CC) -o $@ -c $^
+	$(CC) $(CXXFLAGSS) -o $@ -c $^
 
 EvaluationManager.o: EvaluationManager.cpp
-	$(CC) -o $@ -c $^
+	$(CC) $(CXXFLAGSS) -o $@ -c $^
 
 Simulator.cpp: Simulator.hpp
 RelationalGraph.cpp: RelationalGraph.hpp
@@ -50,19 +50,19 @@ EvaluationManager.cpp: EvaluationManager.hpp
 # テスト関連
 test: $(MAIN_OBJ) mainTest.o RelationalGraphTest.o \
 	PhysicalNetworkTest.o EventManagerTest.o
-	$(CC) -o $@ $^ $(GTEST_LIB)
+	$(CC) $(CXXFLAGSS) -o $@ $^ $(GTEST_LIB)
 
 RelationalGraphTest.o: RelationalGraphTest.cpp
-	$(CC) -o $@ -c $^ $(GTEST_INCDIR)
+	$(CC) $(CXXFLAGSS) -o $@ -c $^ $(GTEST_INCDIR)
 
 mainTest.o: mainTest.cpp
-	$(CC) -o $@ -c $^ $(GTEST_INCDIR)
+	$(CC) $(CXXFLAGSS) -o $@ -c $^ $(GTEST_INCDIR)
 
 PhysicalNetworkTest.o: PhysicalNetworkTest.cpp
-	$(CC) -o $@ -c $^ $(GTEST_INCDIR)
+	$(CC) $(CXXFLAGSS) -o $@ -c $^ $(GTEST_INCDIR)
 
 EventManagerTest.o: EventManagerTest.cpp
-	$(CC) -o $@ -c $^ $(GTEST_INCDIR)
+	$(CC) $(CXXFLAGSS) -o $@ -c $^ $(GTEST_INCDIR)
 
 clean:
 	rm *.o 

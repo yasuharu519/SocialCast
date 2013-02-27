@@ -4,7 +4,7 @@ CC = g++
 RM = rm -f
 
 LDFLAGS =
-CXXFLAGSS= -O3
+CXXFLAGSS= -g -O3
 
 GTEST_INCDIR    = -I$(PROJ_ROOT)/tools/include
 GTEST_LIB   = $(PROJ_ROOT)/tools/lib/gtest_main.a

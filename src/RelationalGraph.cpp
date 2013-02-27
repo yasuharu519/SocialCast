@@ -97,12 +97,12 @@ VertexList RelationalGraph::getContentList(){/*{{{*/
     return contentList;
 }/*}}}*/
 
-bool linkNumSortGreater(const pair<long, long> &a, const pair<long, long> &b)
+bool linkNumSortGreater(const pair<long, long> &a, const pair<long, long> &b)/*{{{*/
 {
     return a.second > b.second;
-}
+}/*}}}*/
 
-void RelationalGraph::setRank()
+void RelationalGraph::setRank()/*{{{*/
 {
     vector<pair<long, long> > rank;
     pair<long, long> item;
@@ -126,9 +126,9 @@ void RelationalGraph::setRank()
         item = rank[i];
         rankMap[item.first] = i+1;
     }
-}
+}/*}}}*/
 
-int RelationalGraph::getRank(int _id)
+int RelationalGraph::getRank(int _id)/*{{{*/
 {
     RankMap::iterator it;
     it = rankMap.find(_id);
@@ -140,9 +140,9 @@ int RelationalGraph::getRank(int _id)
     {
         return -1;
     }
-}
+}/*}}}*/
 
-VertexList RelationalGraph::getLinkedContentsIDListOfUser(Vertex _userID)
+VertexList RelationalGraph::getLinkedContentsIDListOfUser(Vertex _userID)/*{{{*/
 {
     VertexList contentsIDList;
     for(int i = 0; i < succ[_userID].size(); ++i)
@@ -153,7 +153,7 @@ VertexList RelationalGraph::getLinkedContentsIDListOfUser(Vertex _userID)
         }
     }
     return contentsIDList;
-}
+}/*}}}*/
 
 bool sortIDAndPossibilityPair(const pair<int, double> &a, const pair<int, double> &b)/*{{{*/
 {

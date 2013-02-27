@@ -115,7 +115,7 @@ VertexList PhysicalNetwork::searchPhysicalShortestPath(const Vertex &node_from, 
         f[j] = false;
     }
     typedef pair<Weight, int> Distance;
-    priority_queue<Distance, vector<Distance>, less<Distance> > q;
+    priority_queue<Distance, vector<Distance>, greater<Distance> > q;
     q.push(Distance(0, node_from));
     while (!q.empty()) {
         int u;
@@ -175,7 +175,7 @@ Content PhysicalNetwork::chooseRequestContent(Vertex _physicalID)/*{{{*/
     return ids[rand()];
 }/*}}}*/
 
-Vertex PhysicalNetwork::chooseRequestUser()
+Vertex PhysicalNetwork::chooseRequestUser()/*{{{*/
 {
     using namespace boost;
     mt19937 gen(static_cast<unsigned long>(time(0)));
@@ -183,7 +183,7 @@ Vertex PhysicalNetwork::chooseRequestUser()
     variate_generator<mt19937&, uniform_int<> > rand(gen, dst);
     
     return rand();
-}
+}/*}}}*/
 
 ///////////////////////////////////////////////////////////////////////////////
 // Private

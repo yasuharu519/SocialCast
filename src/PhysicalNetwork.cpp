@@ -150,40 +150,35 @@ VertexList PhysicalNetwork::getPhysicalNodeIDList()/*{{{*/
 
 Content PhysicalNetwork::chooseRequestContent(Vertex _physicalID)/*{{{*/
 {
-    // randの設定
+    // boost使うよ!!
     using namespace boost;
-    random_device myseed;
-    //mt19937 gen( static_cast<unsigned long>(time(0)) );
-    mt19937 gen(static_cast<unsigned long>(myseed()));
-    uniform_real<> dst( 0, 1);
-    variate_generator<mt19937&, uniform_real<> > rand( gen, dst );
+
     // 使用する変数
     RequestPossibilityList IDAndPossibilityPairList;
     pair<int, double> item;
-    double length;
-    double sum_length;
-    double accum;
-    double before;
+    vector<Vertex> ids;
+    vector<double> probabilities;
     // 入力はphysicalID
     int relationalID = physicalToRelational[_physicalID];
     IDAndPossibilityPairList = relationalGraph->getRequestPossibilityList(relationalID);
-    double rand_num = rand();
+    // 準備
     for(int i = 0; i < IDAndPossibilityPairList.size(); ++i)
     {
-        if(rand_num < IDAndPossibilityPairList[i].second)
-        {
-            return IDAndPossibilityPairList[i].first;
-        }
+        item = IDAndPossibilityPairList[i];
+        ids.push_back(item.first);
+        probabilities.push_back(item.second);
     }
-    return IDAndPossibilityPairList[IDAndPossibilityPairList.size() - 1].first;
+    // ランダムの設定
+    mt19937 gen(static_cast<unsigned long>(time(0)));
+    random::discrete_distribution<> dist(probabilities.begin(), probabilities.end());
+    variate_generator<mt19937&, random::discrete_distribution<> > rand( gen, dist );
+    return ids[rand()];
 }/*}}}*/
 
 Vertex PhysicalNetwork::chooseRequestUser()
 {
     using namespace boost;
-    random_device myseed;
-    //mt19937 gen(static_cast<unsigned long>(time(0)));
-    mt19937 gen(static_cast<unsigned long>(myseed()));
+    mt19937 gen(static_cast<unsigned long>(time(0)));
     uniform_int<> dst(0, physicalNodeIDList.size()-2); // 最後のIDはdistributorとなっているため
     variate_generator<mt19937&, uniform_int<> > rand(gen, dst);
     

@@ -189,9 +189,7 @@ RequestPossibilityList RelationalGraph::getRequestPossibilityList(Vertex _relati
         accum = 0;
         for(int i = 0; i < IDAndPossibilityPairList.size(); ++i)
         {
-            before = IDAndPossibilityPairList[i].second / sum_length;
-            IDAndPossibilityPairList[i].second = IDAndPossibilityPairList[i].second / sum_length + accum;
-            accum += before;
+            IDAndPossibilityPairList[i].second /= sum_length;
         }
         // メモに登録
         contentsRequestPossibilityMap[_relationalID] = IDAndPossibilityPairList;

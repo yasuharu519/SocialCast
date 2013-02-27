@@ -161,7 +161,6 @@ Content PhysicalNetwork::chooseRequestContent(Vertex _physicalID)/*{{{*/
     uniform_real<> dst( 0, 1);
     variate_generator<mt19937&, uniform_real<> > rand( gen, dst );
     // 使用する変数
-    RequestPossibilityList IDAndShortestPathLength;
     RequestPossibilityList IDAndPossibilityPairList;
     pair<int, double> item;
     double length;
@@ -181,22 +180,17 @@ Content PhysicalNetwork::chooseRequestContent(Vertex _physicalID)/*{{{*/
         {
             length = relationalGraph->dijkstraShortestPathLength(relationalID, contentsIDList[i]);
             sum_length += length;
-            IDAndShortestPathLength.push_back(pair<Vertex, double>(contentsIDList[i], length));
+            IDAndPossibilityPairList.push_back(pair<Vertex, double>(contentsIDList[i], length));
         }
-        // 総合経路長から、最短経路長の割合を計算
-        for(int i = 0; i < IDAndShortestPathLength.size(); ++i)
-        {
-            item = IDAndShortestPathLength[i];
-            IDAndPossibilityPairList.push_back(pair<int, double>(item.first, item.second / sum_length));
-        }
+        //}
         // 割合の長さでソート
         sort(IDAndPossibilityPairList.begin(), IDAndPossibilityPairList.end(), sortIDAndPossibilityPair);
         // 割合から確立に変換
         accum = 0;
         for(int i = 0; i < IDAndPossibilityPairList.size(); ++i)
         {
-            before = IDAndPossibilityPairList[i].second;
-            IDAndPossibilityPairList[i].second += accum;
+            before = IDAndPossibilityPairList[i].second / sum_length;
+            IDAndPossibilityPairList[i].second = IDAndPossibilityPairList[i].second / sum_length + accum;
             accum += before;
         }
         // メモに登録
@@ -217,7 +211,7 @@ Content PhysicalNetwork::chooseRequestContent(Vertex _physicalID)/*{{{*/
     return IDAndPossibilityPairList[IDAndPossibilityPairList.size() - 1].first;
 }/*}}}*/
 
-RequestPossibilityList PhysicalNetwork::getRequestPossibilityList(Vertex _physicalID)
+RequestPossibilityList PhysicalNetwork::getRequestPossibilityList(Vertex _physicalID)/*{{{*/
 {
     int relationalID = physicalToRelational[_physicalID];
     ContentsRequestPossibilityMap::iterator it = contentsRequestPossibilityMap.find(relationalID);
@@ -230,7 +224,7 @@ RequestPossibilityList PhysicalNetwork::getRequestPossibilityList(Vertex _physic
     {
         return possibilityList;
     }
-}
+}/*}}}*/
 
 ///////////////////////////////////////////////////////////////////////////////
 // Private

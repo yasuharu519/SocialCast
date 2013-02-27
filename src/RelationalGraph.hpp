@@ -9,6 +9,7 @@
 #include <vector>
 #include <map>
 #include <boost/foreach.hpp>
+#include <boost/random.hpp>
 #include <climits>
 #include <queue>
 #define foreach BOOST_FOREACH
@@ -27,6 +28,8 @@ typedef double Weight;
 typedef pair<Vertex, Vertex> NodePair;
 typedef map<NodePair, Weight> ShortestMap;
 typedef map<Vertex, int> RankMap;
+typedef vector<pair<Vertex, double> > RequestPossibilityList;
+typedef map<Vertex, RequestPossibilityList> ContentsRequestPossibilityMap;
 
 template <class T> class EdgeProperty {/*{{{*/
     private:/*{{{*/
@@ -87,10 +90,12 @@ class RelationalGraph{
         void setRank();
         int getRank(int _id);
         VertexList getLinkedContentsIDListOfUser(Vertex _userID);
+        RequestPossibilityList getRequestPossibilityList(Vertex _relationalID);
     private:/*{{{*/
         int nodeNum;
         VertexList userList;
         VertexList contentList;
+        ContentsRequestPossibilityMap contentsRequestPossibilityMap;
         //
         void loadNodeLabel();
         void loadEdges();

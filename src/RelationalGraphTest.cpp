@@ -156,3 +156,18 @@ TEST_F(RelationalGraphTest, TestRankOrder)
     EXPECT_EQ(true, result);
 
 }
+
+TEST_F(RelationalGraphTest, TestRequestPossibilityListCacheWillBeAdded)
+{
+    RequestPossibilityList possibilityList = graph->getRequestPossibilityList(0);
+    EXPECT_NE(0, possibilityList.size());
+    bool flag = true;
+    for(int i = 0; i < possibilityList.size() - 1; ++i)
+    {
+        if(possibilityList[i].second > possibilityList[i+1].second)
+        {
+            flag = false;
+        }
+    }
+    EXPECT_EQ(true, flag);
+}

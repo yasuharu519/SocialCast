@@ -27,8 +27,6 @@ typedef vector<UserPosition> UserPositionList;
 typedef map<Vertex, Vertex> NodeIDMapping;
 typedef map<NodePair, VertexList> ShortestPathMap;
 typedef Vertex Content;
-typedef vector<pair<Vertex, double> > RequestPossibilityList;
-typedef map<Vertex, RequestPossibilityList> ContentsRequestPossibilityMap;
 
 using namespace std;
 
@@ -54,13 +52,11 @@ class PhysicalNetwork
         int getUserNodeNum();
         VertexList getPhysicalNodeIDList();
         Content chooseRequestContent(Vertex _physicalID);
-        RequestPossibilityList getRequestPossibilityList(Vertex _physicalID);
     private:
         int userNodeNum;
         RelationalGraph* relationalGraph;
         EvaluationManager* evaluationManager;
         VertexList physicalNodeIDList;
-        ContentsRequestPossibilityMap contentsRequestPossibilityMap;
         //
         void setRandomGeometricPosition();
         void connectWithNeighbors();

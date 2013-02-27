@@ -155,6 +155,55 @@ VertexList RelationalGraph::getLinkedContentsIDListOfUser(Vertex _userID)
     return contentsIDList;
 }
 
+bool sortIDAndPossibilityPair(const pair<int, double> &a, const pair<int, double> &b)/*{{{*/
+{
+    return a.second < b.second;
+}/*}}}*/
+
+RequestPossibilityList RelationalGraph::getRequestPossibilityList(Vertex _relationalID)/*{{{*/
+{
+    // 使用する変数
+    RequestPossibilityList IDAndPossibilityPairList;
+    pair<int, double> item;
+    double length;
+    double sum_length;
+    double accum;
+    double before;
+    // すでに計算しているかcheck
+    ContentsRequestPossibilityMap::iterator it = contentsRequestPossibilityMap.find(_relationalID);
+    if(it == contentsRequestPossibilityMap.end()) // メモ化が見つからなかった場合
+    {
+        sum_length = 0;
+        VertexList contentsIDList = getLinkedContentsIDListOfUser(_relationalID);
+        // 最短路長の計算
+        for(int i = 0; i < contentsIDList.size(); ++i)
+        {
+            length = dijkstraShortestPathLength(_relationalID, contentsIDList[i]);
+            sum_length += length;
+            IDAndPossibilityPairList.push_back(pair<Vertex, double>(contentsIDList[i], length));
+        }
+        //}
+        // 割合の長さでソート
+        sort(IDAndPossibilityPairList.begin(), IDAndPossibilityPairList.end(), sortIDAndPossibilityPair);
+        // 割合から確立に変換
+        accum = 0;
+        for(int i = 0; i < IDAndPossibilityPairList.size(); ++i)
+        {
+            before = IDAndPossibilityPairList[i].second / sum_length;
+            IDAndPossibilityPairList[i].second = IDAndPossibilityPairList[i].second / sum_length + accum;
+            accum += before;
+        }
+        // メモに登録
+        contentsRequestPossibilityMap[_relationalID] = IDAndPossibilityPairList;
+    }
+    else
+    {
+        IDAndPossibilityPairList = it->second;
+    }
+    return IDAndPossibilityPairList;
+}/*}}}*/
+
+
 //////////////////////////////////////////////////////////////////////
 // Private
 //////////////////////////////////////////////////////////////////////

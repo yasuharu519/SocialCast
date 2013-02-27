@@ -50,20 +50,3 @@ TEST_F(PhysicalNetworkTest, TestChooseRequestContentIsActuallyContentFromAllUser
     }
 }
 
-TEST_F(PhysicalNetworkTest, TestChooseRequestContentCacheWillBeAdded)
-{
-    RequestPossibilityList possibilityList = network->getRequestPossibilityList(0);
-    EXPECT_EQ(0, possibilityList.size());
-    int selectedContent = network->chooseRequestContent(0);
-    possibilityList = network->getRequestPossibilityList(0);
-    EXPECT_NE(0, possibilityList.size());
-    bool flag = true;
-    for(int i = 0; i < possibilityList.size() - 1; ++i)
-    {
-        if(possibilityList[i].second > possibilityList[i+1].second)
-        {
-            flag = false;
-        }
-    }
-    EXPECT_EQ(true, flag);
-}

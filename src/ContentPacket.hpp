@@ -8,19 +8,28 @@
 
 #ifndef __CONTENT_PACKET__
 #define __CONTENT_PACKET__
+#include <vector>
+#include "Simulator.hpp"
 
 class Content
 {
     public:
-        Content();
+        Content(int _contentID);
         virtual ~Content();
+        vector<Packet*> createPacket();
+    private:
+        int contentID;
 };
 
 class Packet
 {
     public:
-        Packet();
+        Packet(Content* _content);
         virtual ~Packet();
+    private:
+        static int newestPacketID;
+        int packetID; // リクエストされた際に決めるルートのkeyとなる
+        Content* content;
 };
 
 #endif 

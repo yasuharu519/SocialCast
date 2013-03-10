@@ -17,14 +17,14 @@
 using namespace std;
 
 typedef int Vertex;
-typedef int Content;
+typedef int ContentID;
 
 
 class Event{
     public:
         Vertex fromUser;
         Vertex toUser;
-        Content content;
+        ContentID content;
         //
         Event(double _time);
         virtual ~Event();
@@ -42,8 +42,19 @@ class ContentRequestedEvent: public Event{
 
 class SendPacketEvent: public Event{
     public:
-        SendPacketEvent(double _time);
+        SendPacketEvent(double _time, int _packetID, int _packetIndex, int _packetSum );
         ~SendPacketEvent();
+        //
+        int getPacketIndex();
+        int getSendFromIndex();
+        int getPacketID();
+        int getPacketSum();
+        void incrementSendFromIndex();
+    private:
+        int packetIndex;
+        int packetID;
+        int sendFromIndex;
+        int packetSum;
 };
 
 class ReceivePacketEvent: public Event{
@@ -52,6 +63,11 @@ class ReceivePacketEvent: public Event{
         ~ReceivePacketEvent();
 };
 
+class ContentReceivedEvent: public Event{
+    public:
+        ContentReceivedEvent(double _time);
+        ~ContentReceivedEvent();
+};
 
 // Comparator
 struct DereferenceCompareEvent : public binary_function<Event*, Event*, bool>/*{{{*/
@@ -76,6 +92,9 @@ class EventManager{
     private:
         priority_queue<Event*, vector<Event*>, DereferenceCompareEvent > *eventQ;
         void clearItemsInQueue();
+        map<int, priority_queue<SendPacketEvent*,
+            vector<SendPacketEvent*>,
+            DereferenceCompareEvent > *sendingEventQueue;
 };
 
 

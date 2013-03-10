@@ -15,12 +15,14 @@ PhysicalNetwork::PhysicalNetwork(RelationalGraph* graph, EvaluationManager* _eva
     for(it = userList.begin(); it != userList.end(); ++it)
     {
         neighbor.push_back(VertexList());
+        isSendingToMap.push_back(new map<int, bool>());
         registerIDMapping(physicalID, (*it));
         physicalNodeIDList.push_back(physicalID);
         physicalID++;
     }
     // Distributorの分の登録
     neighbor.push_back(VertexList());
+    isSendingToMap.push_back(new map<int, bool>());
     registerIDMapping(physicalID, distributorID);
     physicalNodeIDList.push_back(physicalID);
     // 
@@ -31,7 +33,10 @@ PhysicalNetwork::PhysicalNetwork(RelationalGraph* graph, EvaluationManager* _eva
 
 PhysicalNetwork::~PhysicalNetwork()/*{{{*/
 {
-    
+    for(int i = 0; i < isSendingToMap.size(); ++i)
+    {
+        delete isSendingToMap[i];
+    }
 }/*}}}*/
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -148,7 +153,7 @@ VertexList PhysicalNetwork::getPhysicalNodeIDList()/*{{{*/
     return physicalNodeIDList;
 }/*}}}*/
 
-Content PhysicalNetwork::chooseRequestContent(Vertex _physicalID)/*{{{*/
+ContentID PhysicalNetwork::chooseRequestContent(Vertex _physicalID)/*{{{*/
 {
     // boost使うよ!!
     using namespace boost;
@@ -185,6 +190,32 @@ Vertex PhysicalNetwork::chooseRequestUser()/*{{{*/
     return rand();
 }/*}}}*/
 
+bool PhysicalNetwork::isSendingTo(int _from, int _to)/*{{{*/
+{
+    map<int, bool>* _map = isSendingToMap[_from];
+    map<int, bool>::iterator it = _map->find(_to);
+    if(it != _map->end())
+    {
+        return it->second;
+    }
+    else
+    {
+        _map->at(_to) = false;
+        return false;
+    }
+}/*}}}*/
+
+void PhysicalNetwork::setSendingTo(int _from, int _to, bool _bool)/*{{{*/
+{
+    map<int, bool>* _map = isSendingToMap[_from];
+    _map->at(_to) = _bool;
+}/*}}}*/
+
+Vertex PhysicalNetwork::getUserOnPathIndexWithPacketID(int _packetID, int _index)/*{{{*/
+{
+    vector<int>& v = packetIDAndPacketPathMap[_packetID];
+    return v[_index];
+}/*}}}*/
 ///////////////////////////////////////////////////////////////////////////////
 // Private
 ///////////////////////////////////////////////////////////////////////////////

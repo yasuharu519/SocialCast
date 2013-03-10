@@ -26,7 +26,7 @@ typedef pair<Vertex, Position> UserPosition;
 typedef vector<UserPosition> UserPositionList;
 typedef map<Vertex, Vertex> NodeIDMapping;
 typedef map<NodePair, VertexList> ShortestPathMap;
-typedef Vertex Content;
+typedef Vertex ContentID;
 
 using namespace std;
 
@@ -51,19 +51,25 @@ class PhysicalNetwork
         VertexList searchPhysicalShortestPath(const Vertex &node_from, const Vertex &node_to);
         int getUserNodeNum();
         VertexList getPhysicalNodeIDList();
-        Content chooseRequestContent(Vertex _physicalID);
+        ContentID chooseRequestContent(Vertex _physicalID);
         Vertex chooseRequestUser();
+        bool isSendingTo(int _from, int _to);
+        void setSendingTo(int _from, int _to, bool _bool);
+        Vertex getUserOnPathIndexWithPacketID(int _packetID, int _index);
     private:
         int userNodeNum;
         RelationalGraph* relationalGraph;
         EvaluationManager* evaluationManager;
         VertexList physicalNodeIDList;
+        vector< map< int, bool >* > isSendingToMap; // 現在送信中か調べるmap
+        map<int, vector<int> > packetIDAndPacketPathMap;
         //
         void setRandomGeometricPosition();
         void connectWithNeighbors();
         double calcPhysicalDistance(const Position&, const Position&);
         void registerIDMapping(const Vertex&, const Vertex&);
         VertexList resolvePath(const int *prev, const Vertex &node_from, const Vertex &node_to);
+
 };
 
 #endif /* defined(__SocialCast__Network__) */

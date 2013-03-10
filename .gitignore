@@ -5,3 +5,4 @@ tools
 src/oldpy
 src/test
 src/main
+src/nbproject/*

@@ -98,9 +98,6 @@ ContentReceivedEvent::~ContentReceivedEvent()
 ///////////////////////////////////////////////////////////////////////////////
 EventManager::EventManager(){/*{{{*/
     eventQ = new priority_queue<Event*, vector<Event*>, DereferenceCompareEvent >();
-    sendingEvnetQueue = new map<int, priority_queue<SendPacketEvent*,
-            vector<SendPacketEvent*>,
-            DereferenceCompareEvent >();
 }/*}}}*/
 
 EventManager::~EventManager(){/*{{{*/
@@ -137,6 +134,55 @@ bool EventManager::isEmpty()/*{{{*/
 {
     return eventQ->empty() == true;
 }/*}}}*/
+
+void EventManager::addSendingEventOnQueue(SendPacketEvent* sendPacketEvent, int from, int to)/*{{{*/
+{
+    map<int, SendingPacketEventQueueMap*>::iterator outerIterator = sendingPacketEventQueueMapMap.find(from);
+    SendingPacketEventQueueMap* _map;
+    SendingPacketEventQueueMap::iterator innerIterator;
+    SendingPacketEventQueue* _queue;
+    if(outerIterator == sendingPacketEventQueueMapMap.end())
+    {
+        sendingPacketEventQueueMapMap.at(from) = new SendingPacketEventQueueMap();
+    }
+    _map = sendingPacketEventQueueMapMap[from];
+    innerIterator = _map->find(to);
+    if(innerIterator == _map->end())
+    {
+        _map->at(to) = new SendingPacketEventQueue();
+    }
+    _queue = _map->at(to);
+    _queue->push(sendPacketEvent);
+}/*}}}*/
+
+bool EventManager::isSendingEventQueueEmpty(int from, int to)
+{
+    map<int, SendingPacketEventQueueMap*>::iterator outerIterator = sendingPacketEventQueueMapMap.find(from);
+    SendingPacketEventQueueMap::iterator innerIterator;
+    SendingPacketEventQueueMap* _map;
+    SendingPacketEventQueue* _queue;
+    if(outerIterator == sendingPacketEventQueueMapMap.end())
+    {
+        sendingPacketEventQueueMapMap.at(from) = new SendingPacketEventQueueMap();
+    }
+    _map = sendingPacketEventQueueMapMap[from];
+    innerIterator = _map->find(to);
+    if(innerIterator == _map->end())
+    {
+        _map->at(to) = new SendingPacketEventQueue();
+    }
+    _queue = _map->at(to);
+    return _queue->empty();
+}
+
+SendPacketEvent* EventManager::popSendingEventFromQueue(int from, int to)
+{
+    SendingPacketEventQueueMap *_map = sendingPacketEventQueueMapMap[from];
+    SendingPacketEventQueue* _queue = _map->at(to);
+    SendPacketEvent* event = _queue->top();
+    _queue->pop();
+    return event;
+}
 
 // private
 void EventManager::clearItemsInQueue()/*{{{*/

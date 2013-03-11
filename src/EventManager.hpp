@@ -78,6 +78,9 @@ struct DereferenceCompareEvent : public binary_function<Event*, Event*, bool>/*{
     }
 };/*}}}*/
 
+typedef priority_queue<SendPacketEvent*, vector<SendPacketEvent*>, DereferenceCompareEvent > SendingPacketEventQueue;
+typedef map<int, SendingPacketEventQueue* > SendingPacketEventQueueMap;
+
 class EventManager{
     public:
         // Constructor/destructor
@@ -89,12 +92,13 @@ class EventManager{
         void clear();
         int size();
         bool isEmpty();
+        void addSendingEventOnQueue(SendPacketEvent* sendPacketEvent, int from, int to);
+        bool isSendingEventQueueEmpty(int from, int to);
+        SendPacketEvent* popSendingEventFromQueue(int from, int to);
     private:
         priority_queue<Event*, vector<Event*>, DereferenceCompareEvent > *eventQ;
         void clearItemsInQueue();
-        map<int, priority_queue<SendPacketEvent*,
-            vector<SendPacketEvent*>,
-            DereferenceCompareEvent > *sendingEventQueue;
+        map<int, SendingPacketEventQueueMap*> sendingPacketEventQueueMapMap;
 };
 
 

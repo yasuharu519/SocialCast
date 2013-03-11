@@ -122,7 +122,8 @@ void Simulator::doSendPacket(SendPacketEvent* event)
     // 送っている最中の場合
     if(physicalNetwork->isSendingTo(sendFrom, sendTo))
     {
-    //   このイベントをキューに追加
+        //   このイベントをキューに追加
+        eventManager->addSendingEventOnQueue(event, sendFrom, sendTo);
         
     }
     // そうでない場合

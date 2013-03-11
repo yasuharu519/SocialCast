@@ -4,7 +4,9 @@ CC = g++
 RM = rm -f
 
 LDFLAGS =
-CXXFLAGSS= -g -O3
+DEBUG = -DDEBUG
+#DEBUG = 
+CXXFLAGSS= -g -O3 $(DEBUG)
 
 BOOST_INCDIR = -I/opt/local/include/boost
 GTEST_INCDIR  = -I$(PROJ_ROOT)/tools/include
@@ -12,6 +14,7 @@ GTEST_LIB   = $(PROJ_ROOT)/tools/lib/gtest_main.a
 
 BUILD_DIR = $(PROJ_ROOT)/build
 SRC_DIR = $(PROJ_ROOT)/src
+
 
 SRCS        = main.cpp
 OBJS        = $(SRCS:.cpp=.o)

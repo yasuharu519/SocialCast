@@ -29,6 +29,11 @@ PhysicalNetwork::PhysicalNetwork(RelationalGraph* graph, EvaluationManager* _eva
     setRandomGeometricPosition();
     connectWithNeighbors();
     userNodeNum = userPositionList.size();
+
+    // ランダム関数のジェネレータ
+    gen = mt19937(static_cast<unsigned long>(time(0)));
+    requestUserDST = uniform_int<>(0, physicalNodeIDList.size()-2); // 最後のIDはdistributorとなっているため
+    geometricPositionDST = uniform_real<>( 0.1, PHYSICAL_NETWORK_MAP_RANGE);
 } /*}}}*/
 
 PhysicalNetwork::~PhysicalNetwork()/*{{{*/
@@ -155,9 +160,6 @@ VertexList PhysicalNetwork::getPhysicalNodeIDList()/*{{{*/
 
 ContentID PhysicalNetwork::chooseRequestContent(Vertex _physicalID)/*{{{*/
 {
-    // boost使うよ!!
-    using namespace boost;
-
     // 使用する変数
     RequestPossibilityList IDAndPossibilityPairList;
     pair<int, double> item;
@@ -174,7 +176,6 @@ ContentID PhysicalNetwork::chooseRequestContent(Vertex _physicalID)/*{{{*/
         probabilities.push_back(item.second);
     }
     // ランダムの設定
-    mt19937 gen(static_cast<unsigned long>(time(0)));
     random::discrete_distribution<> dist(probabilities.begin(), probabilities.end());
     variate_generator<mt19937&, random::discrete_distribution<> > rand( gen, dist );
     return ids[rand()];
@@ -182,11 +183,7 @@ ContentID PhysicalNetwork::chooseRequestContent(Vertex _physicalID)/*{{{*/
 
 Vertex PhysicalNetwork::chooseRequestUser()/*{{{*/
 {
-    using namespace boost;
-    mt19937 gen(static_cast<unsigned long>(time(0)));
-    uniform_int<> dst(0, physicalNodeIDList.size()-2); // 最後のIDはdistributorとなっているため
-    variate_generator<mt19937&, uniform_int<> > rand(gen, dst);
-    
+    variate_generator<mt19937&, uniform_int<> > rand(gen, requestUserDST);
     return rand();
 }/*}}}*/
 
@@ -217,23 +214,20 @@ Vertex PhysicalNetwork::getUserOnPathIndexWithPacketID(int _packetID, int _index
     return v[_index];
 }/*}}}*/
 
-bool PhysicalNetwork::isLastUserToReceivePacket(int _packetID, int _index)
+bool PhysicalNetwork::isLastUserToReceivePacket(int _packetID, int _index)/*{{{*/
 {
     vector<int>& v = packetIDAndPacketPathMap[_packetID];
     return _index == (v.size() - 1);
-}
+}/*}}}*/
 
 ///////////////////////////////////////////////////////////////////////////////
 // Private
 ///////////////////////////////////////////////////////////////////////////////
 void PhysicalNetwork::setRandomGeometricPosition()/*{{{*/
 {
-    using namespace boost;
     userPositionList.push_back(UserPosition(distributorID, Position(0.0, 0.0)));
     VertexList::iterator it;
-    mt19937 gen( static_cast<unsigned long>(time(0)) );
-    uniform_real<> dst( 0.1, PHYSICAL_NETWORK_MAP_RANGE);
-    variate_generator<mt19937&, uniform_real<> > rand( gen, dst );
+    variate_generator<mt19937&, uniform_real<> > rand( gen, geometricPositionDST );
     for(it = userList.begin(); it != userList.end(); ++it)
     {
         Position position = Position(rand() - PHYSICAL_NETWORK_MAP_RANGE / 2.0,

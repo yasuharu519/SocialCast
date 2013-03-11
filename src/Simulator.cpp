@@ -15,6 +15,7 @@ Simulator::Simulator()
     physicalNetwork = new PhysicalNetwork(relationalGraph, evaluationManager);
     eventManager = new EventManager();
     useProposedMethod = false;
+    searchFromRequestedUser = true;
 }
 
 Simulator::~Simulator()
@@ -26,30 +27,51 @@ Simulator::~Simulator()
 }
 
 // public functions
-void Simulator::doSimulation()
+void Simulator::doSimulation(double endTime)/*{{{*/
 {
     // 最初のイベントの追加
     Event* event = new ContentRequestedEvent(0.0);
+    eventManager->addEvent(event);
     double time;
+    #ifdef DEBUG
+    cout << "Loop Start" << endl;
+    #endif
     while(!(eventManager->isEmpty()))
     {
         event = eventManager->popEvent();
         time = event->getEventTime();
-        if(typeid(event) == typeid(ContentRequestedEvent))
+        // 終了時間を超えていた場合終了
+        if(time > endTime){
+            break;
+        }
+        // イベント事に振り分け
+        if(typeid(*event) == typeid(ContentRequestedEvent))
         {
+            #ifdef DEBUG
+            cout << "ContentRequestEvent time:" << time << endl;
+            #endif
             doContentRequest(time);
         }
-        else if(typeid(event) == typeid(ReceivePacketEvent))
+        else if(typeid(*event) == typeid(ReceivePacketEvent))
         {
+            #ifdef DEBUG
+            cout << "ReceivePacketEvent time:" << time << endl;
+            #endif
             doReceivePacket((ReceivePacketEvent*)event);
         }
-        else if(typeid(event) == typeid(SendPacketEvent))
+        else if(typeid(*event) == typeid(SendPacketEvent))
         {
+            #ifdef DEBUG
+            cout << "SendPacketEvent time:" << time << endl;
+            #endif
             doSendPacket((SendPacketEvent*)event);
         }
-        else if(typeid(event) == typeid(ContentReceivedEvent))
+        else if(typeid(*event) == typeid(ContentReceivedEvent))
         {
-            //doContentReceived();
+            #ifdef DEBUG
+            cout << "ContentReceivedEvent time:" << time << endl;
+            #endif
+            doContentReceived((ContentReceivedEvent*)event);
         }
         else{
             cout << "Error: Event class should not be in eventManager" << endl;
@@ -57,10 +79,13 @@ void Simulator::doSimulation()
         }
         delete event;
     }
-}
+}/*}}}*/
 
-void Simulator::createNextRequestEvent(double _time)
+void Simulator::createNextRequestEvent(double _time)/*{{{*/
 {
+    #ifdef DEBUG
+    cout << "createNextRequsetEvent: Start" << endl;
+    #endif
     // boost使うよ!!
     using namespace boost;
     // 変数
@@ -74,30 +99,58 @@ void Simulator::createNextRequestEvent(double _time)
     Event* newRequest = new ContentRequestedEvent(_time + result);
     // Eventの追加
     eventManager->addEvent(newRequest);
-}
+    #ifdef DEBUG
+    cout << "createNextRequsetEvent: End" << endl;
+    #endif
+}/*}}}*/
 
-void Simulator::doContentRequest(double _time)
+void Simulator::doContentRequest(double _time)/*{{{*/
 {
+    #ifdef DEBUG
+    cout << "doContentRequest: Start" << endl;
+    #endif
     Vertex requestUserPhysicalID = physicalNetwork->chooseRequestUser();
     ContentID requestedContentID = physicalNetwork->chooseRequestContent(requestUserPhysicalID);
+    #ifdef DEBUG
+    cout << "UserPhysicalID: " << requestUserPhysicalID << " ContentID: " << requestedContentID << endl;
+    #endif
     int packetID;
     if(useProposedMethod)
     {
-        // TODO: 比較手法での配信
+        // TODO: 提案手法での配信
         // 関数の返り値としてパケットIDみたいなのがほしい
         // map<int, vector<int>> みたいなかたちで、packetIDと配信ろがマッチするように
+        if(searchFromRequestedUser)
+        {
+            // TODO: リクエストのユーザに最も近いところからの経路を探索
+        }
+        else
+        {
+            // TODO: 経路に無ければ、みたいな
+        }
         packetID = 0;
     }
     else
     {
         // TODO: 最短路での配信
+        if(searchFromRequestedUser)
+        {
+            // TODO: リクエストのユーザに最も近いところからの経路を探索
+        }
+        else
+        {
+            // TODO: 経路に無ければ、みたいな
+        }
         packetID = 0;
     }
     generateSendPacketEventFromTime(_time, packetID);
     createNextRequestEvent(_time);
-}
+    #ifdef DEBUG
+    cout << "doContentRequest: End" << endl;
+    #endif
+}/*}}}*/
 
-void Simulator::doReceivePacket(ReceivePacketEvent* event)
+void Simulator::doReceivePacket(ReceivePacketEvent* event)/*{{{*/
 {
     // 最終的な受信者かどうか調べる
     int packetID = event->getPacketID();
@@ -134,9 +187,9 @@ void Simulator::doReceivePacket(ReceivePacketEvent* event)
         newEvent->setEventTime(time);
         eventManager->addEvent(newEvent);
     }
-}
+}/*}}}*/
 
-void Simulator::doSendPacket(SendPacketEvent* event)
+void Simulator::doSendPacket(SendPacketEvent* event)/*{{{*/
 {
     // 誰から誰に送るかの情報を得る
     int packetID = event->getPacketID();
@@ -159,18 +212,29 @@ void Simulator::doSendPacket(SendPacketEvent* event)
         ReceivePacketEvent *receiveEvent = new ReceivePacketEvent(receiveTime, event);
         eventManager->addEvent(receiveEvent);
     }
-}
+}/*}}}*/
+
+void Simulator::doContentReceived(ContentReceivedEvent* event)/*{{{*/
+{
+
+}/*}}}*/
 
 // private functions
 void Simulator::generateSendPacketEventFromTime(double _time, int _packetID)/*{{{*/
 {
+    #ifdef DEBUG
+    cout << "generateSendPacketEventFromTime: Start" << endl;
+    #endif
     double nextTime = _time;
     for(int i = 0; i < PACKET_NUM; ++i)
     {
-        Event* sendPacketEvent = new SendPacketEvent(nextTime, _packetID, i, PACKET_NUM);
-        eventManager->addEvent(sendPacketEvent);
+        //Event* sendPacketEvent = new SendPacketEvent(nextTime, _packetID, i, PACKET_NUM);
+        //eventManager->addEvent(sendPacketEvent);
         nextTime += PACKET_KANKAKU;
     }
+    #ifdef DEBUG
+    cout << "generateSendPacketEventFromTime: End" << endl;
+    #endif
 }/*}}}*/
 
 int main(int argc, char* argv[])
@@ -186,8 +250,11 @@ int main(int argc, char* argv[])
     }
     else
     {
+        #ifdef DEBUG
+        cout << "StartSimulator" << endl;
+        #endif
         Simulator* simulator = new Simulator();
-        simulator->doSimulation();
+        simulator->doSimulation(10000.0);
         delete simulator;
     }
 }

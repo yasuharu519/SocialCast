@@ -29,6 +29,7 @@ typedef map<NodePair, VertexList> ShortestPathMap;
 typedef Vertex ContentID;
 
 using namespace std;
+using namespace boost;
 
 class PhysicalNetwork
 {
@@ -71,6 +72,10 @@ class PhysicalNetwork
         double calcPhysicalDistance(const Position&, const Position&);
         void registerIDMapping(const Vertex&, const Vertex&);
         VertexList resolvePath(const int *prev, const Vertex &node_from, const Vertex &node_to);
+
+        mt19937 gen;
+        uniform_int<> requestUserDST;
+        uniform_real<> geometricPositionDST;
 
 };
 

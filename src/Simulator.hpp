@@ -21,19 +21,21 @@ class Simulator
         Simulator();
         virtual ~Simulator();
         //
-        void doSimulation();
+        void doSimulation(double endTime);
         // 次のリクエストイベントの作成
         void createNextRequestEvent(double _time);
         // 各イベントごとの処理
         void doContentRequest(double time);
         void doReceivePacket(ReceivePacketEvent* event);
         void doSendPacket(SendPacketEvent* event);
+        void doContentReceived(ContentReceivedEvent* event);
     private:
         EvaluationManager* evaluationManager;
         RelationalGraph* relationalGraph;
         PhysicalNetwork* physicalNetwork;
         EventManager* eventManager;
         bool useProposedMethod;
+        bool searchFromRequestedUser;
         //
         void generateSendPacketEventFromTime(double _time, int _packetID);
 

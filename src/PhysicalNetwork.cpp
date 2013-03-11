@@ -200,7 +200,7 @@ bool PhysicalNetwork::isSendingTo(int _from, int _to)/*{{{*/
     }
     else
     {
-        _map->at(_to) = false;
+        (*_map)[_to] = false;
         return false;
     }
 }/*}}}*/

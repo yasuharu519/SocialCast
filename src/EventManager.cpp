@@ -143,19 +143,19 @@ void EventManager::addSendingEventOnQueue(SendPacketEvent* sendPacketEvent, int 
     SendingPacketEventQueue* _queue;
     if(outerIterator == sendingPacketEventQueueMapMap.end())
     {
-        sendingPacketEventQueueMapMap.at(from) = new SendingPacketEventQueueMap();
+        sendingPacketEventQueueMapMap[from] = new SendingPacketEventQueueMap();
     }
     _map = sendingPacketEventQueueMapMap[from];
     innerIterator = _map->find(to);
     if(innerIterator == _map->end())
     {
-        _map->at(to) = new SendingPacketEventQueue();
+        (*_map)[to] = new SendingPacketEventQueue();
     }
     _queue = _map->at(to);
     _queue->push(sendPacketEvent);
 }/*}}}*/
 
-bool EventManager::isSendingEventQueueEmpty(int from, int to)
+bool EventManager::isSendingEventQueueEmpty(int from, int to)/*{{{*/
 {
     map<int, SendingPacketEventQueueMap*>::iterator outerIterator = sendingPacketEventQueueMapMap.find(from);
     SendingPacketEventQueueMap::iterator innerIterator;
@@ -163,26 +163,26 @@ bool EventManager::isSendingEventQueueEmpty(int from, int to)
     SendingPacketEventQueue* _queue;
     if(outerIterator == sendingPacketEventQueueMapMap.end())
     {
-        sendingPacketEventQueueMapMap.at(from) = new SendingPacketEventQueueMap();
+        sendingPacketEventQueueMapMap[from] = new SendingPacketEventQueueMap();
     }
     _map = sendingPacketEventQueueMapMap[from];
     innerIterator = _map->find(to);
     if(innerIterator == _map->end())
     {
-        _map->at(to) = new SendingPacketEventQueue();
+         (*_map)[to] = new SendingPacketEventQueue();
     }
     _queue = _map->at(to);
     return _queue->empty();
-}
+}/*}}}*/
 
-SendPacketEvent* EventManager::popSendingEventFromQueue(int from, int to)
+SendPacketEvent* EventManager::popSendingEventFromQueue(int from, int to)/*{{{*/
 {
     SendingPacketEventQueueMap *_map = sendingPacketEventQueueMapMap[from];
     SendingPacketEventQueue* _queue = _map->at(to);
     SendPacketEvent* event = _queue->top();
     _queue->pop();
     return event;
-}
+}/*}}}*/
 
 // private
 void EventManager::clearItemsInQueue()/*{{{*/

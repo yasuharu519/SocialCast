@@ -117,31 +117,29 @@ void Simulator::doContentRequest(double _time)/*{{{*/
     int packetID;
     if(useProposedMethod)
     {
-        // TODO: 提案手法での配信
+        // 提案手法での配信
         // 関数の返り値としてパケットIDみたいなのがほしい
         // map<int, vector<int>> みたいなかたちで、packetIDと配信ろがマッチするように
         if(searchFromRequestedUser)
         {
-            // TODO: リクエストのユーザに最も近いところからの経路を探索
+            packetID = physicalNetwork->searchProposedPathFromRequestedUser(requestUserPhysicalID, requestedContentID);
         }
         else
         {
             // TODO: 経路に無ければ、みたいな
         }
-        packetID = 0;
     }
     else
     {
-        // TODO: 最短路での配信
+        // 最短路での配信
         if(searchFromRequestedUser)
         {
-            // TODO: リクエストのユーザに最も近いところからの経路を探索
+            packetID = physicalNetwork->searchPhysicalShortestPathFromRequestedUser(requestUserPhysicalID, requestedContentID);
         }
         else
         {
             // TODO: 経路に無ければ、みたいな
         }
-        packetID = 0;
     }
     generateSendPacketEventFromTime(_time, packetID);
     createNextRequestEvent(_time);

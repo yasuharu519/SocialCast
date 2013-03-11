@@ -255,8 +255,7 @@ int PhysicalNetwork::searchPhysicalShortestPathFromRequestedUser(const Vertex &r
         if (f[u]) continue; 
         f[u] = true;
         if(nodeHasContent(u, content)){
-            VertexList path = resolvePath(prev, requestedUser, u);
-            reverse(path.begin(), path.end()); // 反転
+            VertexList path = resolvePath(prev, requestedUser, u, true);
             packetIDAndPacketPathMap[nextPacketID] = path;
             return nextPacketID++;
         }
@@ -289,15 +288,14 @@ int PhysicalNetwork::searchProposedPathFromRequestedUser(const Vertex &requested
         if (f[u]) continue; 
         f[u] = true;
         if(nodeHasContent(u, content)){
-            VertexList path = resolvePath(prev, requestedUser, u);
-            reverse(path.begin(), path.end()); // 反転
+            VertexList path = resolvePath(prev, requestedUser, u, true);
             packetIDAndPacketPathMap[nextPacketID] = path;
             return nextPacketID++;
         }
         // コンテンツとの距離を重みとする
         tmpWeight = relationalGraph->dijkstraShortestPathLength(physicalToRelational[u], content);
         #ifdef DEBUG
-        cout << "RelationalShortestLength User:" << physicalToRelational[u] << " Content:" << content << " Length:" << tmpWeight << endl;
+        //cout << "RelationalShortestLength User(physicalID):" << u << " Content:" << content << " Length:" << tmpWeight << endl;
         #endif
         foreach (Vertex v, neighbor[u])
         {
@@ -315,6 +313,9 @@ bool PhysicalNetwork::nodeHasContent(const Vertex &user, const Vertex &content)/
     VertexList::iterator it;
     if(user == distributorPhysicalID)
     {
+        #ifdef DEBUG
+        cout << "Hit to the distributor userID:" << user << endl;
+        #endif
         return true;
     }
     else
@@ -375,7 +376,7 @@ void PhysicalNetwork::registerIDMapping(const Vertex &physicalID, const Vertex &
         physicalToRelational[physicalID] = relationalID;
 }/*}}}*/
 
-VertexList PhysicalNetwork::resolvePath(const int *prev, const Vertex &node_from, const Vertex &node_to)/*{{{*/
+VertexList PhysicalNetwork::resolvePath(const int *prev, const Vertex &node_from, const Vertex &node_to, bool isReversed)/*{{{*/
 {
     VertexList path;
     Vertex u = node_to;
@@ -385,7 +386,10 @@ VertexList PhysicalNetwork::resolvePath(const int *prev, const Vertex &node_from
         u = prev[u];
         path.push_back(u);
     }
-    reverse(path.begin(), path.end());
+    if(!isReversed)
+    {
+        reverse(path.begin(), path.end());
+    }
     //UtilityFunctions::PrintVertexList(path);
     return path;
 }/*}}}*/

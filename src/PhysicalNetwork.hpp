@@ -80,7 +80,7 @@ class PhysicalNetwork
         void connectWithNeighbors();
         double calcPhysicalDistance(const Position&, const Position&);
         void registerIDMapping(const Vertex&, const Vertex&);
-        VertexList resolvePath(const int *prev, const Vertex &node_from, const Vertex &node_to);
+        VertexList resolvePath(const int *prev, const Vertex &node_from, const Vertex &node_to, bool isReversed=false);
 
         // ランダム発生用
         mt19937 gen;

@@ -167,3 +167,33 @@ TEST_F(EventManagerTest, popSendingEventFromQueue2)/*{{{*/
     delete event4;
     delete event5;
 }/*}}}*/
+
+TEST_F(EventManagerTest, sendPacketCopyConstructorTest)
+{
+    SendPacketEvent* event1 = new SendPacketEvent(1.0, 1, 0, 2);
+    SendPacketEvent* event2 = new SendPacketEvent((*event1));
+    EXPECT_EQ(1.0, event1->getEventTime());
+    EXPECT_EQ(1.0, event2->getEventTime());
+    event2->setEventTime(2.0);
+    EXPECT_EQ(1.0, event1->getEventTime());
+    EXPECT_EQ(2.0, event2->getEventTime());
+    delete event1;
+    delete event2;
+}
+
+
+TEST_F(EventManagerTest, ReceivePacketConstructorTest)
+{
+    SendPacketEvent* event1 = new SendPacketEvent(1.0, 1, 0, 2);
+    ReceivePacketEvent* event2 = new ReceivePacketEvent(2.0, event1);
+    EXPECT_EQ(1.0, event1->getEventTime());
+    EXPECT_EQ(2.0, event2->getEventTime());
+    SendPacketEvent* event3 = event2->getNextSendPacketEvent();
+    delete event2;
+    EXPECT_NE(event3, event1);
+    event3->setEventTime(3.0);
+    EXPECT_NE(3.0, event1->getEventTime());
+    EXPECT_EQ(3.0, event3->getEventTime());
+    delete event1;
+    delete event3;
+}

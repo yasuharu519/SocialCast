@@ -228,8 +228,8 @@ void Simulator::generateSendPacketEventFromTime(double _time, int _packetID)/*{{
     double nextTime = _time;
     for(int i = 0; i < PACKET_NUM; ++i)
     {
-        //Event* sendPacketEvent = new SendPacketEvent(nextTime, _packetID, i, PACKET_NUM);
-        //eventManager->addEvent(sendPacketEvent);
+        Event* sendPacketEvent = new SendPacketEvent(nextTime, _packetID, i, PACKET_NUM);
+        eventManager->addEvent(sendPacketEvent);
         nextTime += PACKET_KANKAKU;
     }
     #ifdef DEBUG

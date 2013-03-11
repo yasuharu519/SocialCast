@@ -5,6 +5,9 @@
 ///////////////////////////////////////////////////////////////////////////////
 PhysicalNetwork::PhysicalNetwork(RelationalGraph* graph, EvaluationManager* _evaluationManager)/*{{{*/
 {
+    #ifdef DEBUG
+    cout << "Constructor Start" << endl;
+    #endif
     evaluationManager = _evaluationManager;
     relationalGraph = graph;
     userList = graph->getUserList();
@@ -12,28 +15,45 @@ PhysicalNetwork::PhysicalNetwork(RelationalGraph* graph, EvaluationManager* _eva
     distributorID = graph->size();
     VertexList::iterator it;
     int physicalID = 0;
+    #ifdef DEBUG
+    cout << "Loop Start" << endl;
+    #endif
     for(it = userList.begin(); it != userList.end(); ++it)
     {
         neighbor.push_back(VertexList());
+        userContentList.push_back(VertexList()); // ユーザが持つコンテンツリスト
         isSendingToMap.push_back(new map<int, bool>());
         registerIDMapping(physicalID, (*it));
         physicalNodeIDList.push_back(physicalID);
         physicalID++;
     }
+    #ifdef DEBUG
+    cout << "Loop End" << endl;
+    #endif
     // Distributorの分の登録
     neighbor.push_back(VertexList());
     isSendingToMap.push_back(new map<int, bool>());
     registerIDMapping(physicalID, distributorID);
     physicalNodeIDList.push_back(physicalID);
+    distributorPhysicalID = physicalID; // Distributorの物理的ID
     // 
-    setRandomGeometricPosition();
-    connectWithNeighbors();
-    userNodeNum = userPositionList.size();
-
+    #ifdef DEBUG
+    cout << "Random Setting Start" << endl;
+    #endif
     // ランダム関数のジェネレータ
     gen = mt19937(static_cast<unsigned long>(time(0)));
     requestUserDST = uniform_int<>(0, physicalNodeIDList.size()-2); // 最後のIDはdistributorとなっているため
     geometricPositionDST = uniform_real<>( 0.1, PHYSICAL_NETWORK_MAP_RANGE);
+    // パケットID作成用
+    nextPacketID = 0;
+    // ポジショニングの開始
+    #ifdef DEBUG
+    cout << "Positioning Start" << endl;
+    #endif
+    setRandomGeometricPosition();
+    connectWithNeighbors();
+    userNodeNum = userPositionList.size();
+
 } /*}}}*/
 
 PhysicalNetwork::~PhysicalNetwork()/*{{{*/
@@ -107,47 +127,6 @@ void PhysicalNetwork::setPositionUntilAllConnected()/*{{{*/
     }
 }/*}}}*/
 
-VertexList PhysicalNetwork::searchPhysicalShortestPath(const Vertex &node_from, const Vertex &node_to)/*{{{*/
-{
-    // TODO: 関係性グラフのほうの重みの計算について、どのようにしてるのか確認する
-    // メモされているものから取り出す
-    ShortestPathMap::iterator it;
-    it = shortestPathMap.find(NodePair(node_from, node_to));
-    if(it != shortestPathMap.end()){
-        return it->second;
-    }
-    // 使用する変数の初期化
-    bool *f = new bool[userNodeNum];
-    Weight *dist = new Weight[userNodeNum];
-    int *prev = new int[userNodeNum];
-    fill_n(dist, userNodeNum, INT_MAX), dist[node_from] = 0, fill_n(prev, userNodeNum, -1);
-    for(int j= 0; j < userNodeNum; j++){
-        f[j] = false;
-    }
-    typedef pair<Weight, int> Distance;
-    priority_queue<Distance, vector<Distance>, greater<Distance> > q;
-    q.push(Distance(0, node_from));
-    while (!q.empty()) {
-        int u;
-        Weight d_u;
-        boost::tuples::tie(d_u, u) = q.top(), q.pop();
-        if (f[u]) continue; 
-        f[u] = true;
-        shortestPathMap[NodePair(node_from, u)] = resolvePath(prev, node_from, u);
-        if(node_to == u){
-            return shortestPathMap[NodePair(node_from, node_to)];
-        }
-        foreach (Vertex v, neighbor[u])
-        {
-            if (dist[v] > d_u + weight(u, v))
-            {
-                prev[v] = u, q.push(Distance(dist[v] = d_u + weight(u, v), v));
-            }
-        }
-    }
-    return shortestPathMap[NodePair(node_from, node_to)];
-}/*}}}*/
-
 int PhysicalNetwork::getUserNodeNum()/*{{{*/
 {
     return userNodeNum;
@@ -218,6 +197,135 @@ bool PhysicalNetwork::isLastUserToReceivePacket(int _packetID, int _index)/*{{{*
 {
     vector<int>& v = packetIDAndPacketPathMap[_packetID];
     return _index == (v.size() - 1);
+}/*}}}*/
+
+// パス検索系
+VertexList PhysicalNetwork::searchPhysicalShortestPath(const Vertex &node_from, const Vertex &node_to)/*{{{*/
+{
+    // TODO: 関係性グラフのほうの重みの計算について、どのようにしてるのか確認する
+    // メモされているものから取り出す
+    ShortestPathMap::iterator it;
+    it = shortestPathMap.find(NodePair(node_from, node_to));
+    if(it != shortestPathMap.end()){
+        return it->second;
+    }
+    // 使用する変数の初期化
+    bool *f = new bool[userNodeNum];
+    Weight *dist = new Weight[userNodeNum];
+    int *prev = new int[userNodeNum];
+    fill_n(dist, userNodeNum, INT_MAX), dist[node_from] = 0, fill_n(prev, userNodeNum, -1), fill_n(f, userNodeNum, false);
+    typedef pair<Weight, int> Distance;
+    priority_queue<Distance, vector<Distance>, greater<Distance> > q;
+    q.push(Distance(0, node_from));
+    while (!q.empty()) {
+        int u;
+        Weight d_u;
+        boost::tuples::tie(d_u, u) = q.top(), q.pop();
+        if (f[u]) continue; 
+        f[u] = true;
+        shortestPathMap[NodePair(node_from, u)] = resolvePath(prev, node_from, u);
+        if(node_to == u){
+            return shortestPathMap[NodePair(node_from, node_to)];
+        }
+        foreach (Vertex v, neighbor[u])
+        {
+            if (dist[v] > d_u + weight(u, v))
+            {
+                prev[v] = u, q.push(Distance(dist[v] = d_u + weight(u, v), v));
+            }
+        }
+    }
+    return shortestPathMap[NodePair(node_from, node_to)];
+}/*}}}*/
+
+int PhysicalNetwork::searchPhysicalShortestPathFromRequestedUser(const Vertex &requestedUser, const Vertex &content)/*{{{*/
+{
+    // 使用する変数の初期化
+    bool *f = new bool[userNodeNum];
+    Weight *dist = new Weight[userNodeNum];
+    int *prev = new int[userNodeNum];
+    fill_n(dist, userNodeNum, INT_MAX), dist[requestedUser] = 0, fill_n(prev, userNodeNum, -1), fill_n(f, userNodeNum, false);
+    typedef pair<Weight, int> Distance;
+    priority_queue<Distance, vector<Distance>, greater<Distance> > q;
+    q.push(Distance(0, requestedUser));
+    while (!q.empty()) {
+        int u;
+        Weight d_u;
+        boost::tuples::tie(d_u, u) = q.top(), q.pop();
+        if (f[u]) continue; 
+        f[u] = true;
+        if(nodeHasContent(u, content)){
+            VertexList path = resolvePath(prev, requestedUser, u);
+            reverse(path.begin(), path.end()); // 反転
+            packetIDAndPacketPathMap[nextPacketID] = path;
+            return nextPacketID++;
+        }
+        foreach (Vertex v, neighbor[u])
+        {
+            if (dist[v] > d_u + weight(u, v))
+            {
+                prev[v] = u, q.push(Distance(dist[v] = d_u + weight(u, v), v));
+            }
+        }
+    }
+    return -1;
+}/*}}}*/
+
+int PhysicalNetwork::searchProposedPathFromRequestedUser(const Vertex &requestedUser, const Vertex &content)/*{{{*/
+{
+    // 使用する変数の初期化
+    bool *f = new bool[userNodeNum];
+    double tmpWeight;
+    Weight *dist = new Weight[userNodeNum];
+    int *prev = new int[userNodeNum];
+    fill_n(dist, userNodeNum, INT_MAX), dist[requestedUser] = 0, fill_n(prev, userNodeNum, -1), fill_n(f, userNodeNum, false);
+    typedef pair<Weight, int> Distance;
+    priority_queue<Distance, vector<Distance>, greater<Distance> > q;
+    q.push(Distance(0, requestedUser));
+    while (!q.empty()) {
+        int u;
+        Weight d_u;
+        boost::tuples::tie(d_u, u) = q.top(), q.pop();
+        if (f[u]) continue; 
+        f[u] = true;
+        if(nodeHasContent(u, content)){
+            VertexList path = resolvePath(prev, requestedUser, u);
+            reverse(path.begin(), path.end()); // 反転
+            packetIDAndPacketPathMap[nextPacketID] = path;
+            return nextPacketID++;
+        }
+        // コンテンツとの距離を重みとする
+        tmpWeight = relationalGraph->dijkstraShortestPathLength(physicalToRelational[u], content);
+        foreach (Vertex v, neighbor[u])
+        {
+            if (dist[v] > d_u + tmpWeight)
+            {
+                prev[v] = u, q.push(Distance(dist[v] = d_u + tmpWeight, v));
+            }
+        }
+    }
+    return -1;
+}/*}}}*/
+
+bool PhysicalNetwork::nodeHasContent(const Vertex &user, const Vertex &content)/*{{{*/
+{
+    VertexList::iterator it;
+    if(user == distributorPhysicalID)
+    {
+        return true;
+    }
+    else
+    {
+        VertexList &list = userContentList[user];
+        for(it = list.begin(); it != list.end(); ++it)
+        {
+            if((*it) == content)
+            {
+                return true;
+            }
+        }
+        return false;
+    }
 }/*}}}*/
 
 ///////////////////////////////////////////////////////////////////////////////

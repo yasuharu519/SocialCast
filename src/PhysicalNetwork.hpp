@@ -45,11 +45,11 @@ class PhysicalNetwork
         ShortestPathMap shortestPathMap;
         WeightProperty weight;
         int distributorID;
+        int distributorPhysicalID;
         //
         Edge add_edge(Vertex, Vertex);
         bool checkConnectivity();
         void setPositionUntilAllConnected();
-        VertexList searchPhysicalShortestPath(const Vertex &node_from, const Vertex &node_to);
         int getUserNodeNum();
         VertexList getPhysicalNodeIDList();
         ContentID chooseRequestContent(Vertex _physicalID);
@@ -58,14 +58,23 @@ class PhysicalNetwork
         void setSendingTo(int _from, int _to, bool _bool);
         Vertex getUserOnPathIndexWithPacketID(int _packetID, int _index);
         bool isLastUserToReceivePacket(int _packetID, int _index);
+        // パス検索系
+        VertexList searchPhysicalShortestPath(const Vertex &node_from, const Vertex &node_to);
+        int searchPhysicalShortestPathFromRequestedUser(const Vertex &requestedUser, const Vertex &content);
+        int searchProposedPathFromRequestedUser(const Vertex &requestedUser, const Vertex &content);
+        // キャッシュ管理関連
+        bool nodeHasContent(const Vertex &user, const Vertex &conent);
     private:
         int userNodeNum;
         RelationalGraph* relationalGraph;
         EvaluationManager* evaluationManager;
         VertexList physicalNodeIDList;
         vector< map< int, bool >* > isSendingToMap; // 現在送信中か調べるmap
-        map<int, vector<int> > packetIDAndPacketPathMap;
-        map<int, ContentID> PacketIDAndContentIDMap;
+        map<int, VertexList > packetIDAndPacketPathMap;
+        map<int, ContentID> packetIDAndContentIDMap;
+        int nextPacketID; // パケットID作成用の変数
+        // キャッシュ管理関連
+        vector< VertexList > userContentList;
         //
         void setRandomGeometricPosition();
         void connectWithNeighbors();
@@ -73,6 +82,7 @@ class PhysicalNetwork
         void registerIDMapping(const Vertex&, const Vertex&);
         VertexList resolvePath(const int *prev, const Vertex &node_from, const Vertex &node_to);
 
+        // ランダム発生用
         mt19937 gen;
         uniform_int<> requestUserDST;
         uniform_real<> geometricPositionDST;

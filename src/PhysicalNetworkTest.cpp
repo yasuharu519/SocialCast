@@ -41,6 +41,26 @@ TEST_F(PhysicalNetworkTest, TestConnectivity){
     EXPECT_EQ(true, network->checkConnectivity());
 }
 
+TEST_F(PhysicalNetworkTest, TestChooseRequestContentIsActuallyContentFromAllUserNode)/*{{{*/
+{
+    int selectedContent;
+    //for(int i = 0; i < (network->getUserNodeNum() - 1); ++i)
+    for(int i = 0; i < 100; ++i)
+    {
+        selectedContent = network->chooseRequestContent(i);
+        EXPECT_EQ(1, graph->vertexTypeMap[selectedContent]);
+    }
+}/*}}}*/
+
+TEST_F(PhysicalNetworkTest, isSendingToAndsetSendingTo)/*{{{*/
+{
+    EXPECT_NE(true, network->isSendingTo(1, 2));
+    network->setSendingTo(1, 2, true);
+    EXPECT_EQ(true, network->isSendingTo(1, 2));
+}/*}}}*/
+
+
+// パス検索系
 TEST_F(PhysicalNetworkTest, TestShortestPath)/*{{{*/
 {
     int testID = network->relationalToPhysical[network->distributorID];
@@ -56,20 +76,26 @@ TEST_F(PhysicalNetworkTest, TestShortestPath)/*{{{*/
     }
 }/*}}}*/
 
-TEST_F(PhysicalNetworkTest, TestChooseRequestContentIsActuallyContentFromAllUserNode)/*{{{*/
+TEST_F(PhysicalNetworkTest, searchPhysicalShortestPath)/*{{{*/
 {
     int selectedContent;
-    for(int i = 0; i < (network->getUserNodeNum() - 1); ++i)
+    int packetID;
+    for(int i = 0; i < 10; ++i)
     {
         selectedContent = network->chooseRequestContent(i);
-        EXPECT_EQ(1, graph->vertexTypeMap[selectedContent]);
+        // パケットIDがどんどん増えていくはず
+        EXPECT_EQ(i, network->searchPhysicalShortestPathFromRequestedUser(i, selectedContent));
     }
 }/*}}}*/
 
-TEST_F(PhysicalNetworkTest, isSendingToAndsetSendingTo)/*{{{*/
+TEST_F(PhysicalNetworkTest, searchProposedPathFromRequestedUser)
 {
-    EXPECT_NE(true, network->isSendingTo(1, 2));
-    network->setSendingTo(1, 2, true);
-    EXPECT_EQ(true, network->isSendingTo(1, 2));
-}/*}}}*/
-
+    int selectedContent;
+    int packetID;
+    for(int i = 0; i < 10; ++i)
+    {
+        selectedContent = network->chooseRequestContent(i);
+        // パケットIDがどんどん増えていくはず
+        EXPECT_EQ(i, network->searchProposedPathFromRequestedUser(i, selectedContent));
+    }
+}

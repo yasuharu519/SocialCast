@@ -48,7 +48,16 @@ Weight RelationalGraph::getEdgeWeight(const Vertex &tail, const Vertex &head){/*
 
 double RelationalGraph::dijkstraShortestPathLength(const Vertex &node_from, const Vertex &node_to){/*{{{*/
     ShortestMap::iterator it;
-    it = shortestmap.find(NodePair(node_from, node_to));
+    // キャッシュから取り出し
+    if(node_from < node_to)
+    {
+        it = shortestmap.find(NodePair(node_from, node_to));
+    }
+    else
+    {
+        it = shortestmap.find(NodePair(node_to, node_from));
+    }
+    // キャッシュから取り出し終わり
     if(it != shortestmap.end()){
         return it->second;
     }
@@ -68,8 +77,17 @@ double RelationalGraph::dijkstraShortestPathLength(const Vertex &node_from, cons
         boost::tuples::tie(d_u, u) = q.top(), q.pop();
         if (f[u]) continue; 
         f[u] = true;
-        shortestmap[NodePair(node_from, u)] = dist[u];
-        shortestmap[NodePair(u, node_from)] = dist[u]; // 両方向対応
+        // キャッシュへの登録
+        // 小さいものを前とする
+        if(node_from < u)
+        {
+            shortestmap[NodePair(node_from, u)] = dist[u];
+        }
+        else
+        {
+            shortestmap[NodePair(u, node_from)] = dist[u];
+        }
+        // キャッシュへの登録終わり
         if(node_to == u){
             //return shortestmap[NodePair(node_from, node_to)];
             return dist[u];

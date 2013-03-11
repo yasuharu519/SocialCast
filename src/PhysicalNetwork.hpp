@@ -56,6 +56,7 @@ class PhysicalNetwork
         bool isSendingTo(int _from, int _to);
         void setSendingTo(int _from, int _to, bool _bool);
         Vertex getUserOnPathIndexWithPacketID(int _packetID, int _index);
+        bool isLastUserToReceivePacket(int _packetID, int _index);
     private:
         int userNodeNum;
         RelationalGraph* relationalGraph;
@@ -63,6 +64,7 @@ class PhysicalNetwork
         VertexList physicalNodeIDList;
         vector< map< int, bool >* > isSendingToMap; // 現在送信中か調べるmap
         map<int, vector<int> > packetIDAndPacketPathMap;
+        map<int, ContentID> PacketIDAndContentIDMap;
         //
         void setRandomGeometricPosition();
         void connectWithNeighbors();

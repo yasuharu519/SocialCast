@@ -216,6 +216,13 @@ Vertex PhysicalNetwork::getUserOnPathIndexWithPacketID(int _packetID, int _index
     vector<int>& v = packetIDAndPacketPathMap[_packetID];
     return v[_index];
 }/*}}}*/
+
+bool PhysicalNetwork::isLastUserToReceivePacket(int _packetID, int _index)
+{
+    vector<int>& v = packetIDAndPacketPathMap[_packetID];
+    return _index == (v.size() - 1);
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // Private
 ///////////////////////////////////////////////////////////////////////////////

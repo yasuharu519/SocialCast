@@ -22,14 +22,12 @@ typedef int ContentID;
 
 class Event{
     public:
-        Vertex fromUser;
-        Vertex toUser;
-        ContentID content;
-        //
         Event(double _time);
         virtual ~Event();
+        Event(const Event& other);
         //
         double getEventTime() const;
+        void setEventTime(double _time);
     private:
         double time;
 };
@@ -44,23 +42,29 @@ class SendPacketEvent: public Event{
     public:
         SendPacketEvent(double _time, int _packetID, int _packetIndex, int _packetSum );
         ~SendPacketEvent();
+        // コピーコンストラクタ
+        SendPacketEvent(const SendPacketEvent& rhs);
         //
         int getPacketIndex();
         int getSendFromIndex();
         int getPacketID();
         int getPacketSum();
         void incrementSendFromIndex();
-    private:
+    protected:
         int packetIndex;
         int packetID;
         int sendFromIndex;
         int packetSum;
 };
 
-class ReceivePacketEvent: public Event{
+class ReceivePacketEvent: public SendPacketEvent{
     public:
-        ReceivePacketEvent(double _time);
+        ReceivePacketEvent(double time, SendPacketEvent *event);
         ~ReceivePacketEvent();
+        SendPacketEvent* getNextSendPacketEvent();
+        void deleteNextSendPacketEvent();
+    private:
+        SendPacketEvent *savedSendPacketEvent;
 };
 
 class ContentReceivedEvent: public Event{

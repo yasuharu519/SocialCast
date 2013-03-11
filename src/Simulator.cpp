@@ -41,11 +41,15 @@ void Simulator::doSimulation()
         }
         else if(typeid(event) == typeid(ReceivePacketEvent))
         {
-            doReceivePacket(ReceivePacketEvent* event);
+            doReceivePacket((ReceivePacketEvent*)event);
         }
         else if(typeid(event) == typeid(SendPacketEvent))
         {
-            doSendPacket(SendPacketEvent* event);
+            doSendPacket((SendPacketEvent*)event);
+        }
+        else if(typeid(event) == typeid(ContentReceivedEvent))
+        {
+            //doContentReceived();
         }
         else{
             cout << "Error: Event class should not be in eventManager" << endl;
@@ -96,38 +100,65 @@ void Simulator::doContentRequest(double _time)
 void Simulator::doReceivePacket(ReceivePacketEvent* event)
 {
     // 最終的な受信者かどうか調べる
-    // 最終的な受信者でないばあい
-    //   indexを増やす
-    //   次の人へと送信イベントを起こす
+    int packetID = event->getPacketID();
+    int receivedUserID = physicalNetwork->getUserOnPathIndexWithPacketID(packetID, event->getSendFromIndex());
+    int sendUserID = physicalNetwork->getUserOnPathIndexWithPacketID(packetID, event->getSendFromIndex() - 1);
+    int packetIndex = event->getPacketIndex();
+    int packetSum = event->getPacketSum();
+    double time = event->getEventTime();
+    if(physicalNetwork->isLastUserToReceivePacket(packetID, receivedUserID))
+    {
     // 最終的な受信者の場合
     //   そのコンテンツに対するパケットの数と受信したパケットの数が一致
     //     コンテンツ受信
     //   一致しない場合
     //     何もしない
-
-    // TODO: 次のsendPacketEvent作成
-    //Event* newSendEvent = 
-
+        if(packetIndex == (packetSum - 1))
+        {
+            ContentReceivedEvent *contentReceivedEvent = new ContentReceivedEvent(time);
+            eventManager->addEvent(contentReceivedEvent);
+            // TODO: 要らないデータなどの消去
+        }
+    }
+    else
+    {
+    // 最終的な受信者でないばあい
+    //   次の人へと送信イベントを起こす
+        SendPacketEvent* nextSendPacketEvent = (ReceivePacketEvent*)event->getNextSendPacketEvent();
+        eventManager->addEvent(nextSendPacketEvent);
+    }
     // キューを確認、このイベント発生後にキューに溜まっているものがあれば、そのイベントを発生させる
-
+    if(!(eventManager->isSendingEventQueueEmpty(sendUserID, receivedUserID)))
+    {
+        SendPacketEvent* newEvent = eventManager->popSendingEventFromQueue(sendUserID, receivedUserID);
+        newEvent->setEventTime(time);
+        eventManager->addEvent(newEvent);
+    }
 }
 
 void Simulator::doSendPacket(SendPacketEvent* event)
 {
     // 誰から誰に送るかの情報を得る
-    int sendFrom = event->getSendFromIndex();
+    int packetID = event->getPacketID();
+    int sendFrom = physicalNetwork->getUserOnPathIndexWithPacketID(packetID, event->getSendFromIndex());
     event->incrementSendFromIndex();
-    int sendTo = event->getSendFromIndex();
+    int sendTo = physicalNetwork->getUserOnPathIndexWithPacketID(packetID, event->getSendFromIndex());
+    double time = event->getEventTime();
     // 送り主から送り先が今送っているところか調べる
     // 送っている最中の場合
     if(physicalNetwork->isSendingTo(sendFrom, sendTo))
     {
         //   このイベントをキューに追加
-        eventManager->addSendingEventOnQueue(event, sendFrom, sendTo);
-        
+        eventManager->addSendingEventOnQueue(new SendPacketEvent((*event)), sendFrom, sendTo);
     }
+    else{
     // そうでない場合
     //   受信イベントの作成
+        physicalNetwork->setSendingTo(sendFrom, sendTo, true);
+        double receiveTime = time + PACKET_SIZE / BANDWIDTH;
+        ReceivePacketEvent *receiveEvent = new ReceivePacketEvent(receiveTime, event);
+        eventManager->addEvent(receiveEvent);
+    }
 }
 
 // private functions

@@ -11,11 +11,20 @@ Event::Event(double _time){
 Event::~Event(){
 
 }
+Event::Event(const Event& other)
+{
+    time = other.time;
+}
 
 //Public
 double Event::getEventTime() const
 {
     return time;
+}
+
+void Event::setEventTime(double _time)
+{
+    time = _time;
 }
 
 // ------------------------------------------------------------------------- //
@@ -40,6 +49,13 @@ SendPacketEvent::SendPacketEvent(double _time, int _packetID, int _packetIndex, 
     packetSum = _packetSum;
     packetID = _packetID;
     sendFromIndex = 0;
+}
+
+SendPacketEvent::SendPacketEvent(const SendPacketEvent& rhs):Event(rhs){
+    packetIndex = rhs.packetIndex;
+    packetSum = rhs.packetSum;
+    packetID = rhs.packetID;
+    sendFromIndex = rhs.sendFromIndex;
 }
 
 SendPacketEvent::~SendPacketEvent(){
@@ -71,12 +87,23 @@ void SendPacketEvent::incrementSendFromIndex()
 ///////////////////////////////////////////////////////////////////////////////
 // ReceivePacketEvent
 ///////////////////////////////////////////////////////////////////////////////
-ReceivePacketEvent::ReceivePacketEvent(double _time):Event(_time){
-
+ReceivePacketEvent::ReceivePacketEvent(double time, SendPacketEvent *event):SendPacketEvent(time, 0, 0, 0){
+    packetIndex = event->getPacketIndex();
+    packetSum = event->getPacketSum();
+    packetID = event->getPacketID();
+    sendFromIndex = event->getSendFromIndex();
+    savedSendPacketEvent = new SendPacketEvent((*event));
 }
 
 ReceivePacketEvent::~ReceivePacketEvent(){
+}
 
+SendPacketEvent* ReceivePacketEvent::getNextSendPacketEvent(){
+    return savedSendPacketEvent;
+}
+
+void ReceivePacketEvent::deleteNextSendPacketEvent(){
+    delete savedSendPacketEvent;
 }
 
 // ------------------------------------------------------------------------- //

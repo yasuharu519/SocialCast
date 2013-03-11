@@ -208,7 +208,7 @@ bool PhysicalNetwork::isSendingTo(int _from, int _to)/*{{{*/
 void PhysicalNetwork::setSendingTo(int _from, int _to, bool _bool)/*{{{*/
 {
     map<int, bool>* _map = isSendingToMap[_from];
-    _map->at(_to) = _bool;
+    (*_map)[_to] = _bool;
 }/*}}}*/
 
 Vertex PhysicalNetwork::getUserOnPathIndexWithPacketID(int _packetID, int _index)/*{{{*/

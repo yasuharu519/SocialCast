@@ -41,7 +41,7 @@ TEST_F(PhysicalNetworkTest, TestConnectivity){
     EXPECT_EQ(true, network->checkConnectivity());
 }
 
-TEST_F(PhysicalNetworkTest, TestShortestPath)
+TEST_F(PhysicalNetworkTest, TestShortestPath)/*{{{*/
 {
     int testID = network->relationalToPhysical[network->distributorID];
     VertexList neighborOfDistributor = network->neighbor[testID];
@@ -54,9 +54,9 @@ TEST_F(PhysicalNetworkTest, TestShortestPath)
         EXPECT_EQ(*expectedList, network->searchPhysicalShortestPath(testID, v));
         delete expectedList;
     }
-}
+}/*}}}*/
 
-TEST_F(PhysicalNetworkTest, TestChooseRequestContentIsActuallyContentFromAllUserNode)
+TEST_F(PhysicalNetworkTest, TestChooseRequestContentIsActuallyContentFromAllUserNode)/*{{{*/
 {
     int selectedContent;
     for(int i = 0; i < (network->getUserNodeNum() - 1); ++i)
@@ -64,5 +64,12 @@ TEST_F(PhysicalNetworkTest, TestChooseRequestContentIsActuallyContentFromAllUser
         selectedContent = network->chooseRequestContent(i);
         EXPECT_EQ(1, graph->vertexTypeMap[selectedContent]);
     }
-}
+}/*}}}*/
+
+TEST_F(PhysicalNetworkTest, isSendingToAndsetSendingTo)/*{{{*/
+{
+    EXPECT_NE(true, network->isSendingTo(1, 2));
+    network->setSendingTo(1, 2, true);
+    EXPECT_EQ(true, network->isSendingTo(1, 2));
+}/*}}}*/
 

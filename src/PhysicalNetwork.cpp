@@ -296,6 +296,9 @@ int PhysicalNetwork::searchProposedPathFromRequestedUser(const Vertex &requested
         }
         // コンテンツとの距離を重みとする
         tmpWeight = relationalGraph->dijkstraShortestPathLength(physicalToRelational[u], content);
+        #ifdef DEBUG
+        cout << "RelationalShortestLength User:" << physicalToRelational[u] << " Content:" << content << " Length:" << tmpWeight << endl;
+        #endif
         foreach (Vertex v, neighbor[u])
         {
             if (dist[v] > d_u + tmpWeight)

@@ -293,7 +293,7 @@ bool PhysicalNetwork::nodeHasContent(const Vertex &user, const Vertex &content)/
     else
     {
         VertexList &list = userContentList[user];
-        UtilityFunctions::PrintVertexList(list);
+        //UtilityFunctions::PrintVertexList(list);
         for(it = list.begin(); it != list.end(); ++it)
         {
             if((*it) == content)

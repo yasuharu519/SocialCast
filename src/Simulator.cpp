@@ -14,7 +14,8 @@ Simulator::Simulator()
     relationalGraph = new RelationalGraph();
     physicalNetwork = new PhysicalNetwork(relationalGraph, evaluationManager);
     eventManager = new EventManager();
-    useProposedMethod = false;
+    //useProposedMethod = false;
+    useProposedMethod = true;
     searchFromRequestedUser = true;
 }
 
@@ -40,6 +41,7 @@ void Simulator::doSimulation(double endTime)/*{{{*/
     {
         event = eventManager->popEvent();
         time = event->getEventTime();
+        cout << "Time: " << time << endl;
         // 終了時間を超えていた場合終了
         if(time > endTime){
             break;
@@ -153,7 +155,7 @@ void Simulator::doReceivePacket(ReceivePacketEvent* event)/*{{{*/
     // 最終的な受信者かどうか調べる
     int packetID = event->getPacketID();
     int receivedUserID = physicalNetwork->getUserOnPathIndexWithPacketID(packetID, event->getSendFromIndex());
-    int sendUserID = physicalNetwork->getUserOnPathIndexWithPacketID(packetID, event->getSendFromIndex() - 1);
+    int sendUserID = physicalNetwork->getUserOnPathIndexWithPacketID(packetID, event->getSendFromIndex() + 1);
     int packetIndex = event->getPacketIndex();
     int packetSum = event->getPacketSum();
     double time = event->getEventTime();
@@ -189,31 +191,51 @@ void Simulator::doReceivePacket(ReceivePacketEvent* event)/*{{{*/
 
 void Simulator::doSendPacket(SendPacketEvent* event)/*{{{*/
 {
+    #ifdef DEBUG
+    cout << "doSendPacket: Start" << endl;
+    #endif
     // 誰から誰に送るかの情報を得る
     int packetID = event->getPacketID();
     int sendFrom = physicalNetwork->getUserOnPathIndexWithPacketID(packetID, event->getSendFromIndex());
-    event->incrementSendFromIndex();
-    int sendTo = physicalNetwork->getUserOnPathIndexWithPacketID(packetID, event->getSendFromIndex());
+    int sendTo = physicalNetwork->getUserOnPathIndexWithPacketID(packetID, event->getSendFromIndex() + 1);
     double time = event->getEventTime();
+    //#ifdef DEBUG
+    //cout << "Checking whether the line is available..." << endl;
+    //cout << "| time: " << time << endl;
+    //cout << "| indexOnPath: " << event->getSendFromIndex() << endl;
+    //cout << "| packetID: " << packetID << endl;
+    //cout << "| sendFrom: " << sendFrom << endl;
+    //cout << "| sendTo: " << sendTo << endl;
+    //#endif
     // 送り主から送り先が今送っているところか調べる
     // 送っている最中の場合
     if(physicalNetwork->isSendingTo(sendFrom, sendTo))
     {
+        #ifdef DEBUG
+        cout << "The line is currently busy..." << endl;
+        #endif
         //   このイベントをキューに追加
         eventManager->addSendingEventOnQueue(new SendPacketEvent((*event)), sendFrom, sendTo);
     }
     else{
     // そうでない場合
     //   受信イベントの作成
+        #ifdef DEBUG
+        cout << "The line is currently available!!" << endl;
+        #endif
         physicalNetwork->setSendingTo(sendFrom, sendTo, true);
         double receiveTime = time + PACKET_SIZE / BANDWIDTH;
         ReceivePacketEvent *receiveEvent = new ReceivePacketEvent(receiveTime, event);
         eventManager->addEvent(receiveEvent);
     }
+    #ifdef DEBUG
+    cout << "doSendPacket: End" << endl;
+    #endif
 }/*}}}*/
 
 void Simulator::doContentReceived(ContentReceivedEvent* event)/*{{{*/
 {
+
 
 }/*}}}*/
 

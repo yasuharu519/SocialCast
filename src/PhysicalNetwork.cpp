@@ -1,4 +1,5 @@
 #include "PhysicalNetwork.hpp"
+#include "UtilityFunctions.hpp"
 
 ///////////////////////////////////////////////////////////////////////////////
 // Constructor/Destructor
@@ -190,6 +191,7 @@ void PhysicalNetwork::setSendingTo(int _from, int _to, bool _bool)/*{{{*/
 Vertex PhysicalNetwork::getUserOnPathIndexWithPacketID(int _packetID, int _index)/*{{{*/
 {
     vector<int>& v = packetIDAndPacketPathMap[_packetID];
+    //UtilityFunctions::PrintVertexList(v);
     return v[_index];
 }/*}}}*/
 

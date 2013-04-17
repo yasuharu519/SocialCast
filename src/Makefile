@@ -4,8 +4,8 @@ CC = g++
 RM = rm -f
 
 LDFLAGS =
-DEBUG = -DDEBUG
-#DEBUG = 
+#DEBUG = -DDEBUG
+DEBUG = 
 CXXFLAGSS= -g -O3 $(DEBUG)
 
 BOOST_INCDIR = -I/opt/local/include/boost

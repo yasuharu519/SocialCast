@@ -91,7 +91,7 @@ ReceivePacketEvent::ReceivePacketEvent(double time, SendPacketEvent *event):Send
     packetIndex = event->getPacketIndex();
     packetSum = event->getPacketSum();
     packetID = event->getPacketID();
-    sendFromIndex = event->getSendFromIndex();
+    sendFromIndex = event->getSendFromIndex() + 1;
     savedSendPacketEvent = new SendPacketEvent((*event));
 }
 

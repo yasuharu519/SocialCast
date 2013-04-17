@@ -149,7 +149,7 @@ void Simulator::doContentRequest(double _time, int contentCacheSize, bool usePro
     }
     // キャッシュのセット
     VertexList path = physicalNetwork->getPathFromPacketID(packetID);
-    physicalNetwork->setCacheOnRoute(path, requestedContentID, contentCacheSize, useProposedMethod);
+    //physicalNetwork->setCacheOnRoute(path, requestedContentID, contentCacheSize, useProposedMethod);
     // generateSendPacketEventFromTime(_time, packetID);
     Event* contentSendingEvent = new ContentStartSendingEvent(_time, packetID);
     eventManager->addEvent(contentSendingEvent);

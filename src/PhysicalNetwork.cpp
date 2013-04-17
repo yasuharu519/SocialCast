@@ -293,6 +293,7 @@ bool PhysicalNetwork::nodeHasContent(const Vertex &user, const Vertex &content)/
     else
     {
         VertexList &list = userContentList[user];
+        UtilityFunctions::PrintVertexList(list);
         for(it = list.begin(); it != list.end(); ++it)
         {
             if((*it) == content)
@@ -388,7 +389,7 @@ void PhysicalNetwork::fillCache(int contentCacheSize, bool useProposedMethod)
             //}
             //sort(IDAndRelationalWeightPairList.begin(), IDAndRelationalWeightPairList.end(),
                     //sortIDAndRelationalWeightPair);
-            //index = 0;
+            index = 0;
             while(userContentList[(*it)].size() < contentCacheSize){
                 userContentList[(*it)].push_back(contentsIDListOfUser[index]);
                 index++;

@@ -17,4 +17,6 @@
 #define PACKET_KANKAKU ((PACKET_SIZE / BANDWIDTH) + 0.0001)
 // packet num
 #define PACKET_NUM ((int)CONTENT_SIZE / PACKET_SIZE)
+// Content Cache Size
+//#define CONTENT_CACHE_SIZE (10)
 

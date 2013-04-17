@@ -167,40 +167,6 @@ Vertex PhysicalNetwork::chooseRequestUser()/*{{{*/
     return rand();
 }/*}}}*/
 
-bool PhysicalNetwork::isSendingTo(int _from, int _to)/*{{{*/
-{
-    map<int, bool>* _map = isSendingToMap[_from];
-    map<int, bool>::iterator it = _map->find(_to);
-    if(it != _map->end())
-    {
-        return it->second;
-    }
-    else
-    {
-        (*_map)[_to] = false;
-        return false;
-    }
-}/*}}}*/
-
-void PhysicalNetwork::setSendingTo(int _from, int _to, bool _bool)/*{{{*/
-{
-    map<int, bool>* _map = isSendingToMap[_from];
-    (*_map)[_to] = _bool;
-}/*}}}*/
-
-Vertex PhysicalNetwork::getUserOnPathIndexWithPacketID(int _packetID, int _index)/*{{{*/
-{
-    vector<int>& v = packetIDAndPacketPathMap[_packetID];
-    //UtilityFunctions::PrintVertexList(v);
-    return v[_index];
-}/*}}}*/
-
-bool PhysicalNetwork::isLastUserToReceivePacket(int _packetID, int _index)/*{{{*/
-{
-    vector<int>& v = packetIDAndPacketPathMap[_packetID];
-    return _index == (v.size() - 1);
-}/*}}}*/
-
 // パス検索系
 VertexList PhysicalNetwork::searchPhysicalShortestPath(const Vertex &node_from, const Vertex &node_to)/*{{{*/
 {
@@ -297,7 +263,7 @@ int PhysicalNetwork::searchProposedPathFromRequestedUser(const Vertex &requested
         // コンテンツとの距離を重みとする
         tmpWeight = relationalGraph->dijkstraShortestPathLength(physicalToRelational[u], content);
         #ifdef DEBUG
-        //cout << "RelationalShortestLength User(physicalID):" << u << " Content:" << content << " Length:" << tmpWeight << endl;
+        cout << "RelationalShortestLength User(physicalID):" << u << " Content:" << content << " Length:" << tmpWeight << endl;
         #endif
         foreach (Vertex v, neighbor[u])
         {
@@ -332,6 +298,46 @@ bool PhysicalNetwork::nodeHasContent(const Vertex &user, const Vertex &content)/
         }
         return false;
     }
+}/*}}}*/
+
+VertexList PhysicalNetwork::getPathFromPacketID(int _packetID){
+    return packetIDAndPacketPathMap[_packetID];
+}
+
+// パスの使用状況を確認
+bool PhysicalNetwork::isSendingTo(int _from, int _to)/*{{{*/
+{
+    map<int, bool>* _map = isSendingToMap[_from];
+    map<int, bool>::iterator it = _map->find(_to);
+    if(it != _map->end())
+    {
+        return it->second;
+    }
+    else
+    {
+        (*_map)[_to] = false;
+        return false;
+    }
+}/*}}}*/
+
+void PhysicalNetwork::setSendingTo(int _from, int _to, bool _bool)/*{{{*/
+{
+    map<int, bool>* _map = isSendingToMap[_from];
+    (*_map)[_to] = _bool;
+}/*}}}*/
+
+// パケット関係
+Vertex PhysicalNetwork::getUserOnPathIndexWithPacketID(int _packetID, int _index)/*{{{*/
+{
+    vector<int>& v = packetIDAndPacketPathMap[_packetID];
+    //UtilityFunctions::PrintVertexList(v);
+    return v[_index];
+}/*}}}*/
+
+bool PhysicalNetwork::isLastUserToReceivePacket(int _packetID, int _index)/*{{{*/
+{
+    vector<int>& v = packetIDAndPacketPathMap[_packetID];
+    return _index == (v.size() - 1);
 }/*}}}*/
 
 ///////////////////////////////////////////////////////////////////////////////

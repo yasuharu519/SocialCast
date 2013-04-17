@@ -64,6 +64,8 @@ class PhysicalNetwork
         int searchProposedPathFromRequestedUser(const Vertex &requestedUser, const Vertex &content);
         // キャッシュ管理関連
         bool nodeHasContent(const Vertex &user, const Vertex &conent);
+        // PacketID
+        VertexList getPathFromPacketID(int _packetID);
     private:
         int userNodeNum;
         RelationalGraph* relationalGraph;

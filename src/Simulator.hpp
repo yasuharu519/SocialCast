@@ -27,7 +27,8 @@ class Simulator
         // 各イベントごとの処理
         void doContentRequest(double time);
         void doReceivePacket(ReceivePacketEvent* event);
-        void doSendPacket(SendPacketEvent* event);
+        //void doSendPacket(SendPacketEvent* event);
+        void doContentSending(ContentStartSendingEvent* event);
         void doContentReceived(ContentReceivedEvent* event);
     private:
         EvaluationManager* evaluationManager;

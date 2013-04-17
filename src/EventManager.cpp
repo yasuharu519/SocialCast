@@ -4,7 +4,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // Event
 ///////////////////////////////////////////////////////////////////////////////
-Event::Event(double _time){
+Event::Event(double _time){/*{{{*/
     time = _time;
 }
 
@@ -25,26 +25,41 @@ double Event::getEventTime() const
 void Event::setEventTime(double _time)
 {
     time = _time;
-}
+}/*}}}*/
 
 // ------------------------------------------------------------------------- //
 ///////////////////////////////////////////////////////////////////////////////
 // ContentRequestedEvent
 ///////////////////////////////////////////////////////////////////////////////
-ContentRequestedEvent::ContentRequestedEvent(double _time):Event(_time){
+ContentRequestedEvent::ContentRequestedEvent(double _time):Event(_time){/*{{{*/
 
 }
 
 ContentRequestedEvent::~ContentRequestedEvent(){
 
+}/*}}}*/
+
+// ------------------------------------------------------------------------- //
+///////////////////////////////////////////////////////////////////////////////
+// ContentStartSending
+///////////////////////////////////////////////////////////////////////////////
+ContentStartSendingEvent::ContentStartSendingEvent(double _time, int _packetID):Event(_time){/*{{{*/
+    packetID = _packetID;
 }
 
+ContentStartSendingEvent::~ContentStartSendingEvent(){
+
+}/*}}}*/
+
+int ContentStartSendingEvent::getPacketID(){
+    return packetID;
+}
 
 // ------------------------------------------------------------------------- //
 ///////////////////////////////////////////////////////////////////////////////
 // SendPacketEvent
 ///////////////////////////////////////////////////////////////////////////////
-SendPacketEvent::SendPacketEvent(double _time, int _packetID, int _packetIndex, int _packetSum):Event(_time){
+SendPacketEvent::SendPacketEvent(double _time, int _packetID, int _packetIndex, int _packetSum):Event(_time){/*{{{*/
     packetIndex = _packetIndex;
     packetSum = _packetSum;
     packetID = _packetID;
@@ -81,13 +96,13 @@ int SendPacketEvent::getPacketSum()
 void SendPacketEvent::incrementSendFromIndex()
 {
     ++sendFromIndex;
-}
+}/*}}}*/
 
 // ------------------------------------------------------------------------- //
 ///////////////////////////////////////////////////////////////////////////////
 // ReceivePacketEvent
 ///////////////////////////////////////////////////////////////////////////////
-ReceivePacketEvent::ReceivePacketEvent(double time, SendPacketEvent *event):SendPacketEvent(time, 0, 0, 0){
+ReceivePacketEvent::ReceivePacketEvent(double time, SendPacketEvent *event):SendPacketEvent(time, 0, 0, 0){/*{{{*/
     packetIndex = event->getPacketIndex();
     packetSum = event->getPacketSum();
     packetID = event->getPacketID();
@@ -104,20 +119,20 @@ SendPacketEvent* ReceivePacketEvent::getNextSendPacketEvent(){
 
 void ReceivePacketEvent::deleteNextSendPacketEvent(){
     delete savedSendPacketEvent;
-}
+}/*}}}*/
 
 // ------------------------------------------------------------------------- //
 ///////////////////////////////////////////////////////////////////////////////
 // ContentReceivedEvent
 ///////////////////////////////////////////////////////////////////////////////
-ContentReceivedEvent::ContentReceivedEvent(double _time):Event(_time)
+ContentReceivedEvent::ContentReceivedEvent(double _time):Event(_time)/*{{{*/
 {
 
 }
 
 ContentReceivedEvent::~ContentReceivedEvent()
 {
-}
+}/*}}}*/
 
 // ------------------------------------------------------------------------- //
 ///////////////////////////////////////////////////////////////////////////////

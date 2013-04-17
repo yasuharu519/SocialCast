@@ -38,6 +38,15 @@ class ContentRequestedEvent: public Event{
         ~ContentRequestedEvent();
 };
 
+class ContentStartSendingEvent: public Event{
+    public:
+        ContentStartSendingEvent(double _time, int _packetID);
+        ~ContentStartSendingEvent();
+        int getPacketID();
+    protected:
+        int packetID;
+};
+
 class SendPacketEvent: public Event{
     public:
         SendPacketEvent(double _time, int _packetID, int _packetIndex, int _packetSum );

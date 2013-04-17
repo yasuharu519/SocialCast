@@ -15,7 +15,6 @@ Simulator::Simulator()
     physicalNetwork = new PhysicalNetwork(relationalGraph, evaluationManager);
     eventManager = new EventManager();
     // オプション
-    useProposedMethod = true;
     searchFromRequestedUser = true;
 }
 
@@ -28,31 +27,43 @@ Simulator::~Simulator()
 }
 
 // public functions
-void Simulator::doSimulation(double endTime)/*{{{*/
+void Simulator::doSimulation(int contentRequestTime, int ContentCacheSize, bool useProposedMethod)/*{{{*/
 {
     // 最初のイベントの追加
     Event* event = new ContentRequestedEvent(0.0);
     eventManager->addEvent(event);
     double time;
+    // キャッシュを満たす
+    cout << "Filling Cache...";
+    physicalNetwork->fillCache(ContentCacheSize, useProposedMethod);
+    cout << "  Filled!!" << endl;
     #ifdef DEBUG
     cout << "Loop Start" << endl;
     #endif
+    int requestCount = 0;
     while(!(eventManager->isEmpty()))
     {
         event = eventManager->popEvent();
         time = event->getEventTime();
         cout << "Time: " << time << endl;
         // 終了時間を超えていた場合終了
-        if(time > endTime){
-            break;
-        }
+        //if(requestCount >= contentRequestTime){
+            //break;
+        //}
         // イベント事に振り分け
         if(typeid(*event) == typeid(ContentRequestedEvent))
         {
+            // リクエスト回数を超えていた場合終了
+            if(requestCount >= contentRequestTime)
+                break;
+            requestCount++;
             #ifdef DEBUG
             cout << "----------- ContentRequestEvent time:" << time << endl;
+            cout << "==========================================" << endl;
+            cout << "RequestCount: " << requestCount << endl;
+            cout << "==========================================" << endl;
             #endif
-            doContentRequest(time);
+            doContentRequest(time, ContentCacheSize, useProposedMethod);
         }
         else if(typeid(*event) == typeid(ContentStartSendingEvent))
         {
@@ -99,7 +110,7 @@ void Simulator::createNextRequestEvent(double _time)/*{{{*/
     #endif
 }/*}}}*/
 
-void Simulator::doContentRequest(double _time)/*{{{*/
+void Simulator::doContentRequest(double _time, int contentCacheSize, bool useProposedMethod)/*{{{*/
 {
     #ifdef DEBUG
     cout << "doContentRequest: Start" << endl;
@@ -136,6 +147,9 @@ void Simulator::doContentRequest(double _time)/*{{{*/
             // TODO: リクエスト元から探索を行わない場合
         }
     }
+    // キャッシュのセット
+    VertexList path = physicalNetwork->getPathFromPacketID(packetID);
+    physicalNetwork->setCacheOnRoute(path, requestedContentID, contentCacheSize, useProposedMethod);
     // generateSendPacketEventFromTime(_time, packetID);
     Event* contentSendingEvent = new ContentStartSendingEvent(_time, packetID);
     eventManager->addEvent(contentSendingEvent);
@@ -155,8 +169,9 @@ void Simulator::doContentSending(ContentStartSendingEvent* event)/*{{{*/
     //int sendFrom = physicalNetwork->getUserOnPathIndexWithPacketID(packetID, event->getSendFromIndex());
     //int sendTo = physicalNetwork->getUserOnPathIndexWithPacketID(packetID, event->getSendFromIndex() + 1);
     VertexList path = physicalNetwork->getPathFromPacketID(packetID);
+    cout << "Length: " << path.size() << endl;
     double time = event->getEventTime();
-    //#ifdef DEBUG
+    //#ifdef DEBUG/*{{{*/
     //cout << "Checking whether the line is available..." << endl;
     //cout << "| time: " << time << endl;
     //cout << "| indexOnPath: " << event->getSendFromIndex() << endl;
@@ -174,15 +189,13 @@ void Simulator::doContentSending(ContentStartSendingEvent* event)/*{{{*/
         ////   このイベントをキューに追加
         //eventManager->addSendingEventOnQueue(new SendPacketEvent((*event)), sendFrom, sendTo);
     //}
-    //else{
+    //else{/*}}}*/
     // そうでない場合
     //   受信イベントの作成
-    #ifdef DEBUG
-    cout << "The line is currently available!!" << endl;
-    #endif
     //physicalNetwork->setSendingTo(sendFrom, sendTo, true);
     //double receiveTime = time + PACKET_SIZE / BANDWIDTH;
-    double receiveTime = time + PACKET_SIZE / BANDWIDTH;
+    double receiveTime = time + (CONTENT_SIZE / BANDWIDTH) * (path.size() - 1);
+    cout << "===== Time: " << receiveTime - time << endl;
     ContentReceivedEvent *receiveEvent = new ContentReceivedEvent(receiveTime);
     eventManager->addEvent(receiveEvent);
     //}
@@ -260,20 +273,35 @@ int main(int argc, char* argv[])
 {
     char program[256];
     char method[256];
+    int requestCount;
+    int cacheSize;
+    bool useProposedMethod;
     strcpy(program, argv[0]);
     cout << program << endl;
-    if(argc < 2)
+    if(argc < 4)
     {
-        cout << "Usage: " << program << " [method] " << endl;
+        cout << "Usage: " << program << " requestCount cacheSize [method(proposed|not)] " << endl;
         exit(1);
     }
     else
     {
+        // 変数の取得
+        requestCount = atoi(argv[1]);
+        cacheSize = atoi(argv[2]);
+        // 提案手法か否か
+        if(strcmp(argv[3], "proposed") == 0){
+            useProposedMethod = true;
+            cout << "useProposedMethod" << endl;
+        }else{
+            useProposedMethod = false;
+            cout << "not useProposedMethod" << endl;
+        }
+
         #ifdef DEBUG
         cout << "StartSimulator" << endl;
         #endif
         Simulator* simulator = new Simulator();
-        simulator->doSimulation(10000.0);
+        simulator->doSimulation(requestCount, cacheSize, useProposedMethod);
         delete simulator;
     }
 }

@@ -247,7 +247,8 @@ int PhysicalNetwork::searchProposedPathFromRequestedUser(const Vertex &requested
     int *prev = new int[userNodeNum];
     fill_n(dist, userNodeNum, INT_MAX), dist[requestedUser] = 0, fill_n(prev, userNodeNum, -1), fill_n(f, userNodeNum, false);
     typedef pair<Weight, int> Distance;
-    priority_queue<Distance, vector<Distance>, greater<Distance> > q;
+    //priority_queue<Distance, vector<Distance>, greater<Distance> > q;
+    priority_queue<Distance, vector<Distance>, less<Distance> > q;
     q.push(Distance(0, requestedUser));
     while (!q.empty()) {
         int u;
@@ -256,6 +257,9 @@ int PhysicalNetwork::searchProposedPathFromRequestedUser(const Vertex &requested
         if (f[u]) continue; 
         f[u] = true;
         if(nodeHasContent(u, content)){
+            #ifdef DEBUG
+            cout << "RelationalDistance: " << dist[u] << endl;
+            #endif
             VertexList path = resolvePath(prev, requestedUser, u, true);
             packetIDAndPacketPathMap[nextPacketID] = path;
             return nextPacketID++;
@@ -263,7 +267,7 @@ int PhysicalNetwork::searchProposedPathFromRequestedUser(const Vertex &requested
         // コンテンツとの距離を重みとする
         tmpWeight = relationalGraph->dijkstraShortestPathLength(physicalToRelational[u], content);
         #ifdef DEBUG
-        cout << "RelationalShortestLength User(physicalID):" << u << " Content:" << content << " Length:" << tmpWeight << endl;
+        //cout << "RelationalShortestLength User(physicalID):" << u << " Content:" << content << " Length:" << tmpWeight << endl;
         #endif
         foreach (Vertex v, neighbor[u])
         {
@@ -293,12 +297,121 @@ bool PhysicalNetwork::nodeHasContent(const Vertex &user, const Vertex &content)/
         {
             if((*it) == content)
             {
+                #ifdef DEBUG
+                cout << "Hit to the distributor userID:" << user << endl;
+                #endif
                 return true;
             }
         }
         return false;
     }
 }/*}}}*/
+
+void PhysicalNetwork::setCacheOnRoute(VertexList path, int contentID, int contentCacheSize, bool useProposedMethod){/*{{{*/
+    VertexList::iterator it;
+    VertexList contentList;
+    if(useProposedMethod){
+        for(it = path.begin(); it != path.end(); ++it){
+            contentList = userContentList[(*it)];
+            contentList.push_back(contentID);
+            if(contentList.size() > contentCacheSize)
+                dropCacheBasedOnProposedMethod((*it), contentID);
+        }
+    }else{
+        //for(it = path.begin(); it != path.end(); ++it){
+            //contentList = userContentList[(*it)];
+            //contentList.push_back(contentID);
+            //if(contentList.size() > contentCacheSize)
+                //dropCacheBasedOnConventionalMethod((*it));
+        //}
+    }
+}/*}}}*/
+
+void PhysicalNetwork::dropCacheBasedOnProposedMethod(int userID, int contentID)/*{{{*/
+{
+    VertexList::iterator it, todrop;
+    int relationalID;
+    int minimumValue;
+    int relationalStrength;
+    VertexList contentList = userContentList[userID];
+    // とりあえず初期値にセット
+    todrop = contentList.begin();
+    relationalID = physicalToRelational[(*todrop)];
+    minimumValue = relationalGraph->dijkstraShortestPathLength(relationalID, contentID);
+    for(it = contentList.begin(); it != contentList.end(); ++it)
+    {
+        relationalID = physicalToRelational[(*it)];
+        relationalStrength = relationalGraph->dijkstraShortestPathLength(relationalID, contentID);
+        if(relationalStrength < minimumValue)
+        {
+            todrop = it;
+            minimumValue = relationalStrength;
+        }
+    }
+    contentList.erase(todrop);
+}/*}}}*/
+
+void PhysicalNetwork::dropCacheBasedOnConventionalMethod(int userID)/*{{{*/
+{
+}/*}}}*/
+
+bool sortIDAndRelationalWeightPair(const pair<int, double> &a, const pair<int, double> &b)/*{{{*/
+{
+    return a.second < b.second;
+}/*}}}*/
+
+bool sortIDAndRankPair(const pair<int, int> &a, const pair<int, int> &b)/*{{{*/
+{
+    return a.second < b.second;
+}/*}}}*/
+
+void PhysicalNetwork::fillCache(int contentCacheSize, bool useProposedMethod)
+{
+    vector<pair<int, double> > IDAndRelationalWeightPairList;
+    vector<pair<int, int> > IDAndRankPairList;
+    VertexList contentsIDListOfUser;
+    VertexList userListInPhysicalID = physicalNodeIDList;
+    int userIDInRelational;
+    int index;
+    VertexList::iterator it, content_it;
+    if(useProposedMethod)
+    {
+        for(it = userListInPhysicalID.begin(); it != userListInPhysicalID.end(); ++it)
+        {
+            //cout << "User:" << (*it) << endl;
+            userIDInRelational = physicalToRelational[(*it)];
+            contentsIDListOfUser = relationalGraph->getMostRelatedContentsFromUser(userIDInRelational, contentCacheSize);
+            //for(content_it = contentsIDListOfUser.begin(); content_it != contentsIDListOfUser.end(); ++content_it)
+            //{
+                //IDAndRelationalWeightPairList.push_back(pair<int, double>((*content_it),
+                            //relationalGraph->getEdgeWeight(userIDInRelational, (*content_it))));
+            //}
+            //sort(IDAndRelationalWeightPairList.begin(), IDAndRelationalWeightPairList.end(),
+                    //sortIDAndRelationalWeightPair);
+            //index = 0;
+            while(userContentList[(*it)].size() < contentCacheSize){
+                userContentList[(*it)].push_back(contentsIDListOfUser[index]);
+                index++;
+            }
+        }
+    }else{
+        for(it = contentList.begin(); it != contentList.end(); ++it)
+        {
+            IDAndRankPairList.push_back(pair<int, int>((*it),
+                        relationalGraph->getRank((*it))));
+        }
+        sort(IDAndRankPairList.begin(), IDAndRankPairList.end(), sortIDAndRankPair);
+        for(it = userListInPhysicalID.begin(); it != userListInPhysicalID.end(); ++it)
+        {
+            index = 0;
+            while(userContentList[(*it)].size() < contentCacheSize){
+                userContentList[(*it)].push_back(IDAndRankPairList[index].first);
+                index++;
+            }
+        }
+    
+    }
+}
 
 VertexList PhysicalNetwork::getPathFromPacketID(int _packetID){
     return packetIDAndPacketPathMap[_packetID];

@@ -91,6 +91,8 @@ class RelationalGraph{
         int getRank(int _id);
         VertexList getLinkedContentsIDListOfUser(Vertex _userID);
         RequestPossibilityList getRequestPossibilityList(Vertex _relationalID);
+        // キャッシュのため
+        VertexList getMostRelatedContentsFromUser(Vertex _userID, int cacheNum);
     private:/*{{{*/
         int nodeNum;
         VertexList userList;

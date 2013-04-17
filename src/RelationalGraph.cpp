@@ -219,6 +219,55 @@ RequestPossibilityList RelationalGraph::getRequestPossibilityList(Vertex _relati
     return IDAndPossibilityPairList;
 }/*}}}*/
 
+VertexList RelationalGraph::getMostRelatedContentsFromUser(Vertex _userID, int cacheNum){/*{{{*/
+    // キャッシュを満たすため、関係の強いコンテンツをcacheNumだけとる
+    // 結果
+    VertexList result;
+    bool *f = new bool[nodeNum];
+    Weight *dist = new Weight[nodeNum];
+    int *prev = new int[nodeNum];
+    fill_n(dist, nodeNum, INT_MAX), dist[_userID] = 0, fill_n(prev, nodeNum, -1);
+    for(int j= 0; j < nodeNum; j++){
+        f[j] = false;
+    }
+    typedef pair<Weight, int> Distance;
+    priority_queue<Distance, vector<Distance>, greater<Distance> > q;
+    q.push(Distance(0, _userID));
+    while (!q.empty()) {
+        int u;
+        Weight d_u;
+        boost::tuples::tie(d_u, u) = q.top(), q.pop();
+        if (f[u]) continue; 
+        f[u] = true;
+        // 小さいものを前とする
+        if(_userID < u)
+        {
+            shortestmap[NodePair(_userID, u)] = dist[u];
+        }
+        else
+        {
+            shortestmap[NodePair(u, _userID)] = dist[u];
+        }
+         //キャッシュへの登録終わり
+        //if(node_to == u){
+            //return shortestmap[NodePair(node_from, node_to)];
+            //return dist[u];
+        //}
+        if(vertexTypeMap[u] == 1){
+            result.push_back(u);
+            if(result.size() >= cacheNum)
+                return result;
+        }
+        foreach (Vertex v, succ[u])
+        {
+            if (dist[v] > d_u + weight(u, v))
+            {
+                prev[v] = u, q.push(Distance(dist[v] = d_u + weight(u, v), v));
+            }
+        }
+    }
+    return result;
+}/*}}}*/
 
 //////////////////////////////////////////////////////////////////////
 // Private
@@ -250,6 +299,8 @@ void RelationalGraph::loadEdges(){/*{{{*/
     while(getline(weight_fs, weight_buff) && getline(link_fs, link_buff)){
         sscanf(weight_buff.data(), "%lf", &link_weight);
         sscanf(link_buff.data(), "%d %d", &node_from, &node_to);
+        // 値の反転 (値が小さいほど関係が強いことに)
+        link_weight = 1.0 / link_weight;
         weight[add_edge(node_from, node_to)] = link_weight;
         weight[add_edge(node_to, node_from)] = link_weight;
     }

@@ -21,11 +21,11 @@ class Simulator
         Simulator();
         virtual ~Simulator();
         //
-        void doSimulation(double endTime);
+        void doSimulation(int contentRequestTime, int contentCacheSize, bool useProposedMethod);
         // 次のリクエストイベントの作成
         void createNextRequestEvent(double _time);
         // 各イベントごとの処理
-        void doContentRequest(double time);
+        void doContentRequest(double time, int contentCacheSize, bool useProposedMethod);
         void doReceivePacket(ReceivePacketEvent* event);
         //void doSendPacket(SendPacketEvent* event);
         void doContentSending(ContentStartSendingEvent* event);

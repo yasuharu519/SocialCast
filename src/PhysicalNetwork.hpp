@@ -64,6 +64,10 @@ class PhysicalNetwork
         int searchProposedPathFromRequestedUser(const Vertex &requestedUser, const Vertex &content);
         // キャッシュ管理関連
         bool nodeHasContent(const Vertex &user, const Vertex &conent);
+        void setCacheOnRoute(VertexList path, int contentID, int contentCacheSize, bool useProposedMethod);
+        void dropCacheBasedOnProposedMethod(int userID, int contentID);
+        void dropCacheBasedOnConventionalMethod(int userID);
+        void fillCache(int contentCacheSize, bool useProposedMethod);
         // PacketID
         VertexList getPathFromPacketID(int _packetID);
     private:

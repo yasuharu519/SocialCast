@@ -15,6 +15,7 @@ Simulator::Simulator()
     physicalNetwork = new PhysicalNetwork(relationalGraph, evaluationManager);
     eventManager = new EventManager();
     //useProposedMethod = false;
+    // オプション
     useProposedMethod = true;
     searchFromRequestedUser = true;
 }

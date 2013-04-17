@@ -197,6 +197,8 @@ RequestPossibilityList RelationalGraph::getRequestPossibilityList(Vertex _relati
         for(int i = 0; i < contentsIDList.size(); ++i)
         {
             length = dijkstraShortestPathLength(_relationalID, contentsIDList[i]);
+            // 関係の強いものほど距離が短いので変換
+            length = 1.0 / length;
             sum_length += length;
             IDAndPossibilityPairList.push_back(pair<Vertex, double>(contentsIDList[i], length));
         }

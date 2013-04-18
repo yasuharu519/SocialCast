@@ -68,8 +68,10 @@ class PhysicalNetwork
         void dropCacheBasedOnProposedMethod(int userID, int contentID);
         void dropCacheBasedOnConventionalMethod(int userID);
         void fillCache(int contentCacheSize, bool useProposedMethod);
+        void clearCacheOfNodes();
         // PacketID
         VertexList getPathFromPacketID(int _packetID);
+        int getContentIDFromPacketID(int _packetID);
     private:
         int userNodeNum;
         RelationalGraph* relationalGraph;

@@ -225,6 +225,7 @@ int PhysicalNetwork::searchPhysicalShortestPathFromRequestedUser(const Vertex &r
         if(nodeHasContent(u, content)){
             VertexList path = resolvePath(prev, requestedUser, u, true);
             packetIDAndPacketPathMap[nextPacketID] = path;
+            packetIDAndContentIDMap[nextPacketID] = content;
             return nextPacketID++;
         }
         foreach (Vertex v, neighbor[u])
@@ -262,12 +263,13 @@ int PhysicalNetwork::searchProposedPathFromRequestedUser(const Vertex &requested
             #endif
             VertexList path = resolvePath(prev, requestedUser, u, true);
             packetIDAndPacketPathMap[nextPacketID] = path;
+            packetIDAndContentIDMap[nextPacketID] = content;
             return nextPacketID++;
         }
         // コンテンツとの距離を重みとする
         tmpWeight = relationalGraph->dijkstraShortestPathLength(physicalToRelational[u], content);
         #ifdef DEBUG
-        //cout << "RelationalShortestLength User(physicalID):" << u << " Content:" << content << " Length:" << tmpWeight << endl;
+        cout << "RelationalShortestLength User(physicalID):" << u << " Content:" << content << " Length:" << tmpWeight << endl;
         #endif
         foreach (Vertex v, neighbor[u])
         {
@@ -366,7 +368,7 @@ bool sortIDAndRankPair(const pair<int, int> &a, const pair<int, int> &b)/*{{{*/
     return a.second < b.second;
 }/*}}}*/
 
-void PhysicalNetwork::fillCache(int contentCacheSize, bool useProposedMethod)
+void PhysicalNetwork::fillCache(int contentCacheSize, bool useProposedMethod)/*{{{*/
 {
     vector<pair<int, double> > IDAndRelationalWeightPairList;
     vector<pair<int, int> > IDAndRankPairList;
@@ -379,7 +381,6 @@ void PhysicalNetwork::fillCache(int contentCacheSize, bool useProposedMethod)
     {
         for(it = userListInPhysicalID.begin(); it != userListInPhysicalID.end(); ++it)
         {
-            //cout << "User:" << (*it) << endl;
             userIDInRelational = physicalToRelational[(*it)];
             contentsIDListOfUser = relationalGraph->getMostRelatedContentsFromUser(userIDInRelational, contentCacheSize);
             //for(content_it = contentsIDListOfUser.begin(); content_it != contentsIDListOfUser.end(); ++content_it)
@@ -412,10 +413,24 @@ void PhysicalNetwork::fillCache(int contentCacheSize, bool useProposedMethod)
         }
     
     }
+}/*}}}*/
+
+void PhysicalNetwork::clearCacheOfNodes()
+{
+    vector<VertexList>::iterator it;
+    for(it = userContentList.begin(); it != userContentList.end(); ++it)
+    {
+        (*it).clear();
+    }
 }
 
-VertexList PhysicalNetwork::getPathFromPacketID(int _packetID){
+VertexList PhysicalNetwork::getPathFromPacketID(int _packetID){/*{{{*/
     return packetIDAndPacketPathMap[_packetID];
+}/*}}}*/
+
+int PhysicalNetwork::getContentIDFromPacketID(int _packetID)
+{
+    return packetIDAndContentIDMap[_packetID];
 }
 
 // パスの使用状況を確認

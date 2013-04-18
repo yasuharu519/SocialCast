@@ -6,3 +6,4 @@ src/oldpy
 src/test
 src/main
 src/nbproject/*
+experiment_result/*

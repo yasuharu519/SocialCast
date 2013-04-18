@@ -26,17 +26,14 @@ Simulator::~Simulator()
     delete eventManager;
 }
 
-// public functions
-void Simulator::doSimulation(int contentRequestTime, int ContentCacheSize, bool useProposedMethod)/*{{{*/
+void Simulator::doSimulation(int contentRequestTime, int ContentCacheSize, bool useProposedMethod,
+        ofstream &distribution_datafile, ofstream &path_datafile)/*{{{*/
 {
     // 最初のイベントの追加
     Event* event = new ContentRequestedEvent(0.0);
     eventManager->addEvent(event);
     double time;
     // キャッシュを満たす
-    cout << "Filling Cache...";
-    physicalNetwork->fillCache(ContentCacheSize, useProposedMethod);
-    cout << "  Filled!!" << endl;
     #ifdef DEBUG
     cout << "Loop Start" << endl;
     #endif
@@ -45,7 +42,9 @@ void Simulator::doSimulation(int contentRequestTime, int ContentCacheSize, bool 
     {
         event = eventManager->popEvent();
         time = event->getEventTime();
+        #ifdef DEBUG
         cout << "Time: " << time << endl;
+        #endif
         // 終了時間を超えていた場合終了
         //if(requestCount >= contentRequestTime){
             //break;
@@ -70,7 +69,8 @@ void Simulator::doSimulation(int contentRequestTime, int ContentCacheSize, bool 
             #ifdef DEBUG
             cout << "---------- ContentStartSendingEvent time:" << time << endl;
             #endif
-            doContentSending((ContentStartSendingEvent*)event);
+            doContentSending((ContentStartSendingEvent*)event,
+                    distribution_datafile, path_datafile);
         }
         else if(typeid(*event) == typeid(ContentReceivedEvent))
         {
@@ -110,7 +110,7 @@ void Simulator::createNextRequestEvent(double _time)/*{{{*/
     #endif
 }/*}}}*/
 
-void Simulator::doContentRequest(double _time, int contentCacheSize, bool useProposedMethod)/*{{{*/
+void Simulator::doContentRequest(double _time, int contentCacheSize, bool useProposedMethod)
 {
     #ifdef DEBUG
     cout << "doContentRequest: Start" << endl;
@@ -149,8 +149,6 @@ void Simulator::doContentRequest(double _time, int contentCacheSize, bool usePro
     }
     // キャッシュのセット
     VertexList path = physicalNetwork->getPathFromPacketID(packetID);
-    //physicalNetwork->setCacheOnRoute(path, requestedContentID, contentCacheSize, useProposedMethod);
-    // generateSendPacketEventFromTime(_time, packetID);
     Event* contentSendingEvent = new ContentStartSendingEvent(_time, packetID);
     eventManager->addEvent(contentSendingEvent);
     createNextRequestEvent(_time);
@@ -159,17 +157,34 @@ void Simulator::doContentRequest(double _time, int contentCacheSize, bool usePro
     #endif
 }/*}}}*/
 
-void Simulator::doContentSending(ContentStartSendingEvent* event)/*{{{*/
+double Simulator::calcRelationalStrengthOfPath(VertexList path, int contentID)
+{
+    double result = 0.0;
+    VertexList::iterator it;
+    int relationalID;
+    for(it = path.begin(); it != path.end(); ++it)
+    {
+        relationalID = physicalNetwork->physicalToRelational[(*it)];
+        result += 1.0 / relationalGraph->dijkstraShortestPathLength(relationalID, contentID);
+    }
+    return result;
+}
+
+void Simulator::doContentSending(ContentStartSendingEvent* event,
+                ofstream &distribution_datafile, ofstream &path_datafile)
 {
     #ifdef DEBUG
     cout << "doSendPacket: Start" << endl;
     #endif
     // 誰から誰に送るかの情報を得る
     int packetID = event->getPacketID();
+    int contentID = physicalNetwork->getContentIDFromPacketID(packetID);
     //int sendFrom = physicalNetwork->getUserOnPathIndexWithPacketID(packetID, event->getSendFromIndex());
     //int sendTo = physicalNetwork->getUserOnPathIndexWithPacketID(packetID, event->getSendFromIndex() + 1);
     VertexList path = physicalNetwork->getPathFromPacketID(packetID);
+    #ifdef DEBUG
     cout << "Length: " << path.size() << endl;
+    #endif
     double time = event->getEventTime();
     //#ifdef DEBUG/*{{{*/
     //cout << "Checking whether the line is available..." << endl;
@@ -195,7 +210,22 @@ void Simulator::doContentSending(ContentStartSendingEvent* event)/*{{{*/
     //physicalNetwork->setSendingTo(sendFrom, sendTo, true);
     //double receiveTime = time + PACKET_SIZE / BANDWIDTH;
     double receiveTime = time + (CONTENT_SIZE / BANDWIDTH) * (path.size() - 1);
+    // 書き込み
+    distribution_datafile << receiveTime - time << ", " << calcRelationalStrengthOfPath(path, contentID) << endl;
+    if(path.size() != 0){
+        path_datafile << path[0];
+        if(path.size() > 1){
+            for(int i = 1; i < path.size(); ++i){
+                path_datafile << ", ";
+                path_datafile << path[i];
+            }
+        }
+    }
+    path_datafile << endl;
+        
+    #ifdef DEBUG
     cout << "===== Time: " << receiveTime - time << endl;
+    #endif
     ContentReceivedEvent *receiveEvent = new ContentReceivedEvent(receiveTime);
     eventManager->addEvent(receiveEvent);
     //}
@@ -209,6 +239,17 @@ void Simulator::doContentReceived(ContentReceivedEvent* event)/*{{{*/
 
 
 }/*}}}*/
+
+// キャッシュ関連
+void Simulator::resetCacheOfNodes()
+{
+    physicalNetwork->clearCacheOfNodes();
+}
+
+void Simulator::setCacheBasedOnMethod(bool useProposedMethod, int cacheSize)
+{
+    physicalNetwork->fillCache(cacheSize, useProposedMethod);
+}
 
 // パケット関係
 void Simulator::doReceivePacket(ReceivePacketEvent* event)/*{{{*/
@@ -273,14 +314,15 @@ int main(int argc, char* argv[])
 {
     char program[256];
     char method[256];
+    ofstream distribution_datafile;
+    ofstream path_datafile;
     int requestCount;
     int cacheSize;
     bool useProposedMethod;
     strcpy(program, argv[0]);
-    cout << program << endl;
-    if(argc < 4)
+    if(argc < 3)
     {
-        cout << "Usage: " << program << " requestCount cacheSize [method(proposed|not)] " << endl;
+        cout << "Usage: " << program << " requestCount cacheSize" << endl;
         exit(1);
     }
     else
@@ -289,19 +331,40 @@ int main(int argc, char* argv[])
         requestCount = atoi(argv[1]);
         cacheSize = atoi(argv[2]);
         // 提案手法か否か
-        if(strcmp(argv[3], "proposed") == 0){
-            useProposedMethod = true;
-            cout << "useProposedMethod" << endl;
-        }else{
-            useProposedMethod = false;
-            cout << "not useProposedMethod" << endl;
-        }
+        //if(strcmp(argv[3], "proposed") == 0){
+            //useProposedMethod = true;
+            //#ifdef DEBUG
+            //cout << "useProposedMethod" << endl;
+            //#endif
+        //}else{
+            //useProposedMethod = false;
+            //#ifdef DEBUG
+            //cout << "not useProposedMethod" << endl;
+            //#endif
+        //}
 
         #ifdef DEBUG
         cout << "StartSimulator" << endl;
         #endif
-        Simulator* simulator = new Simulator();
-        simulator->doSimulation(requestCount, cacheSize, useProposedMethod);
+        // 提案手法での配信
+        useProposedMethod = true;
+        distribution_datafile.open("LatencyAndSumOfSocialMetric_proposed.txt");
+        path_datafile.open("path_proposed.txt");
+        Simulator *simulator = new Simulator();
+        simulator->setCacheBasedOnMethod(useProposedMethod, cacheSize);
+        simulator->doSimulation(requestCount, cacheSize, useProposedMethod, distribution_datafile, path_datafile);
+        distribution_datafile.close();
+        path_datafile.close();
+        // クリア
+        simulator->resetCacheOfNodes();
+        // 比較手法での配信
+        useProposedMethod = false;
+        distribution_datafile.open("LatencyAndSumOfSocialMetric_conventional.txt");
+        path_datafile.open("path_conventional.txt");
+        simulator->setCacheBasedOnMethod(useProposedMethod, cacheSize);
+        simulator->doSimulation(requestCount, cacheSize, useProposedMethod, distribution_datafile, path_datafile);
+        distribution_datafile.close();
+        path_datafile.close();
         delete simulator;
     }
 }

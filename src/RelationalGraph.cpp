@@ -59,6 +59,7 @@ double RelationalGraph::dijkstraShortestPathLength(const Vertex &node_from, cons
     }
     // キャッシュから取り出し終わり
     if(it != shortestmap.end()){
+        //cout << "dist" << node_from << ", " << node_to << ", : " << it->second << endl;
         return it->second;
     }
     bool *f = new bool[nodeNum];
@@ -90,6 +91,7 @@ double RelationalGraph::dijkstraShortestPathLength(const Vertex &node_from, cons
         // キャッシュへの登録終わり
         if(node_to == u){
             //return shortestmap[NodePair(node_from, node_to)];
+            //cout << "dist" << node_from << ", " << node_to << ", : " << dist[u] << endl;
             return dist[u];
         }
         foreach (Vertex v, succ[u])
@@ -303,6 +305,7 @@ void RelationalGraph::loadEdges(){/*{{{*/
         sscanf(link_buff.data(), "%d %d", &node_from, &node_to);
         // 値の反転 (値が小さいほど関係が強いことに)
         link_weight = 1.0 / link_weight;
+        //cout << node_from << ", " << node_to << ", " << link_weight << endl;
         weight[add_edge(node_from, node_to)] = link_weight;
         weight[add_edge(node_to, node_from)] = link_weight;
     }

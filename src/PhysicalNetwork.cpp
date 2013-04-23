@@ -249,7 +249,7 @@ int PhysicalNetwork::searchProposedPathFromRequestedUser(const Vertex &requested
     fill_n(dist, userNodeNum, INT_MAX), dist[requestedUser] = 0, fill_n(prev, userNodeNum, -1), fill_n(f, userNodeNum, false);
     typedef pair<Weight, int> Distance;
     //priority_queue<Distance, vector<Distance>, greater<Distance> > q;
-    priority_queue<Distance, vector<Distance>, less<Distance> > q;
+    priority_queue<Distance, vector<Distance>, greater<Distance> > q;
     q.push(Distance(0, requestedUser));
     while (!q.empty()) {
         int u;

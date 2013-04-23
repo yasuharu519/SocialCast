@@ -160,14 +160,20 @@ void Simulator::doContentRequest(double _time, int contentCacheSize, bool usePro
 double Simulator::calcRelationalStrengthOfPath(VertexList path, int contentID)
 {
     double result = 0.0;
+    double tmp;
     VertexList::iterator it;
     int relationalID;
+    int count = 0;
     for(it = path.begin(); it != path.end(); ++it)
     {
         relationalID = physicalNetwork->physicalToRelational[(*it)];
-        result += 1.0 / relationalGraph->dijkstraShortestPathLength(relationalID, contentID);
+        if(relationalID != physicalNetwork->distributorID){
+            tmp = relationalGraph->dijkstraShortestPathLength(relationalID, contentID);
+            result += 1.0 / tmp;
+            count++;
+        }
     }
-    return result;
+    return result / count;
 }
 
 void Simulator::doContentSending(ContentStartSendingEvent* event,

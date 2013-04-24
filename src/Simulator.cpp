@@ -16,6 +16,8 @@ Simulator::Simulator()
     eventManager = new EventManager();
     // オプション
     searchFromRequestedUser = true;
+    //cout << "UserNum: " << relationalGraph->getUserList().size() << endl;
+    //cout << "ContentNum: " << relationalGraph->getContentList().size() << endl;
 }
 
 Simulator::~Simulator()
@@ -336,23 +338,11 @@ int main(int argc, char* argv[])
         // 変数の取得
         requestCount = atoi(argv[1]);
         cacheSize = atoi(argv[2]);
-        // 提案手法か否か
-        //if(strcmp(argv[3], "proposed") == 0){
-            //useProposedMethod = true;
-            //#ifdef DEBUG
-            //cout << "useProposedMethod" << endl;
-            //#endif
-        //}else{
-            //useProposedMethod = false;
-            //#ifdef DEBUG
-            //cout << "not useProposedMethod" << endl;
-            //#endif
-        //}
 
         #ifdef DEBUG
         cout << "StartSimulator" << endl;
         #endif
-        // 提案手法での配信
+        //// 提案手法での配信
         useProposedMethod = true;
         distribution_datafile.open("LatencyAndSumOfSocialMetric_proposed.txt");
         path_datafile.open("path_proposed.txt");
@@ -372,6 +362,7 @@ int main(int argc, char* argv[])
         distribution_datafile.close();
         path_datafile.close();
         delete simulator;
+
     }
 }
 

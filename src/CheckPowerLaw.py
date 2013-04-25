@@ -22,15 +22,15 @@ def loadLinkData():
             line = line.rstrip()
             tail, head = [int(x) for x in line.split()]
             if tail in users and head in contents:
-                users[tail].append(head)
+                contents[head].append(tail)
             elif tail in contents and head in users:
-                users[head].append(tail)
+                contents[tail].append(head)
 
 loadNodeType()
 loadLinkData()
-for i, u in enumerate(sorted(users.items(),
+for i, c in enumerate(sorted(contents.items(),
         key=lambda x: len(x[1]),
         reverse=True)):
-    u_id, u_contents = u
+    c_id, c_contents = c
     #print u_id, len(u_contents)
-    print i+1, len(u_contents)
+    print i+1, len(c_contents)

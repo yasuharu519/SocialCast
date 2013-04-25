@@ -72,6 +72,7 @@ class PhysicalNetwork
         // PacketID
         VertexList getPathFromPacketID(int _packetID);
         int getContentIDFromPacketID(int _packetID);
+        int getNumberOfPaths();
     private:
         int userNodeNum;
         RelationalGraph* relationalGraph;

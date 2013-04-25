@@ -433,6 +433,14 @@ int PhysicalNetwork::getContentIDFromPacketID(int _packetID)
     return packetIDAndContentIDMap[_packetID];
 }
 
+int PhysicalNetwork::getNumberOfPaths(){
+    int output = 0;
+    for(int i = 0; i <= distributorPhysicalID; ++i ){
+        output += neighbor[i].size();
+    }
+    return output / 2;
+}
+
 // パスの使用状況を確認
 bool PhysicalNetwork::isSendingTo(int _from, int _to)/*{{{*/
 {

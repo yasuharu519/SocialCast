@@ -31,6 +31,8 @@ Simulator::~Simulator()
 void Simulator::doSimulation(int contentRequestTime, int ContentCacheSize, bool useProposedMethod,
         ofstream &distribution_datafile, ofstream &path_datafile)/*{{{*/
 {
+    // パスの数の書き込み
+    path_datafile << physicalNetwork->getNumberOfPaths() << endl;
     // 最初のイベントの追加
     Event* event = new ContentRequestedEvent(0.0);
     eventManager->addEvent(event);

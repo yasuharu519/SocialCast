@@ -208,6 +208,8 @@ VertexList PhysicalNetwork::searchPhysicalShortestPath(const Vertex &node_from, 
 
 int PhysicalNetwork::searchPhysicalShortestPathFromRequestedUser(const Vertex &requestedUser, const Vertex &content)/*{{{*/
 {
+    // DBLookupCount
+    int lookUpCount = 0;
     // 使用する変数の初期化
     bool *f = new bool[userNodeNum];
     Weight *dist = new Weight[userNodeNum];
@@ -222,10 +224,12 @@ int PhysicalNetwork::searchPhysicalShortestPathFromRequestedUser(const Vertex &r
         boost::tuples::tie(d_u, u) = q.top(), q.pop();
         if (f[u]) continue; 
         f[u] = true;
+        lookUpCount++; // DBLookUpCountの更新
         if(nodeHasContent(u, content)){
             VertexList path = resolvePath(prev, requestedUser, u, true);
             packetIDAndPacketPathMap[nextPacketID] = path;
             packetIDAndContentIDMap[nextPacketID] = content;
+            packetIDAndDBLookupCount[nextPacketID] = lookUpCount;
             return nextPacketID++;
         }
         foreach (Vertex v, neighbor[u])
@@ -241,6 +245,8 @@ int PhysicalNetwork::searchPhysicalShortestPathFromRequestedUser(const Vertex &r
 
 int PhysicalNetwork::searchProposedPathFromRequestedUser(const Vertex &requestedUser, const Vertex &content)/*{{{*/
 {
+    // DBLookupCount
+    int lookUpCount = 0;
     // 使用する変数の初期化
     bool *f = new bool[userNodeNum];
     double tmpWeight;
@@ -257,6 +263,7 @@ int PhysicalNetwork::searchProposedPathFromRequestedUser(const Vertex &requested
         boost::tuples::tie(d_u, u) = q.top(), q.pop();
         if (f[u]) continue; 
         f[u] = true;
+        lookUpCount++; // DBLookUpCountの更新
         if(nodeHasContent(u, content)){
             #ifdef DEBUG
             cout << "RelationalDistance: " << dist[u] << endl;
@@ -264,6 +271,7 @@ int PhysicalNetwork::searchProposedPathFromRequestedUser(const Vertex &requested
             VertexList path = resolvePath(prev, requestedUser, u, true);
             packetIDAndPacketPathMap[nextPacketID] = path;
             packetIDAndContentIDMap[nextPacketID] = content;
+            packetIDAndDBLookupCount[nextPacketID] = lookUpCount;
             return nextPacketID++;
         }
         // コンテンツとの距離を重みとする
@@ -431,6 +439,11 @@ VertexList PhysicalNetwork::getPathFromPacketID(int _packetID){/*{{{*/
 int PhysicalNetwork::getContentIDFromPacketID(int _packetID)
 {
     return packetIDAndContentIDMap[_packetID];
+}
+
+int PhysicalNetwork::getDBLookupCountFromPacketID(int _packetID)
+{
+    return packetIDAndDBLookupCount[_packetID];
 }
 
 int PhysicalNetwork::getNumberOfPaths(){

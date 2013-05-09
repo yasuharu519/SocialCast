@@ -192,6 +192,7 @@ void Simulator::doContentSending(ContentStartSendingEvent* event,
     //int sendFrom = physicalNetwork->getUserOnPathIndexWithPacketID(packetID, event->getSendFromIndex());
     //int sendTo = physicalNetwork->getUserOnPathIndexWithPacketID(packetID, event->getSendFromIndex() + 1);
     VertexList path = physicalNetwork->getPathFromPacketID(packetID);
+    int DBLookupCount = physicalNetwork->getDBLookupCountFromPacketID(packetID);
     #ifdef DEBUG
     cout << "Length: " << path.size() << endl;
     #endif
@@ -221,7 +222,8 @@ void Simulator::doContentSending(ContentStartSendingEvent* event,
     //double receiveTime = time + PACKET_SIZE / BANDWIDTH;
     double receiveTime = time + (CONTENT_SIZE / BANDWIDTH) * (path.size() - 1);
     // 書き込み
-    distribution_datafile << receiveTime - time << ", " << calcRelationalStrengthOfPath(path, contentID) << endl;
+    distribution_datafile << receiveTime - time << ", " << calcRelationalStrengthOfPath(path, contentID) 
+        << ", " << DBLookupCount << endl;
     if(path.size() != 0){
         path_datafile << path[0];
         if(path.size() > 1){

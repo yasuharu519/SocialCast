@@ -2,6 +2,7 @@ NodeData
 build
 tools
 *.o
+src/*.txt
 src/oldpy
 src/test
 src/main

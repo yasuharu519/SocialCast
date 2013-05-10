@@ -72,7 +72,8 @@ class PhysicalNetwork
         // PacketID
         VertexList getPathFromPacketID(int _packetID);
         int getContentIDFromPacketID(int _packetID);
-        int getDBLookupCountFromPacketID(int _packetID);
+        int getPhysicalDBLookupCountFromPacketID(int _packetID);
+        int getRelationalDBLookupCountFromPacketID(int _packetID);
         int getNumberOfPaths();
     private:
         int userNodeNum;
@@ -82,7 +83,8 @@ class PhysicalNetwork
         vector< map< int, bool >* > isSendingToMap; // 現在送信中か調べるmap
         map<int, VertexList > packetIDAndPacketPathMap;
         map<int, ContentID> packetIDAndContentIDMap;
-        map<int, int> packetIDAndDBLookupCount;
+        map<int, int> packetIDAndPhysicalDBLookupCount;
+        map<int, int> packetIDAndRelationalDBLookupCount;
         int nextPacketID; // パケットID作成用の変数
         // キャッシュ管理関連
         vector< VertexList > userContentList;

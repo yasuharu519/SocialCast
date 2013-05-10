@@ -229,7 +229,8 @@ int PhysicalNetwork::searchPhysicalShortestPathFromRequestedUser(const Vertex &r
             VertexList path = resolvePath(prev, requestedUser, u, true);
             packetIDAndPacketPathMap[nextPacketID] = path;
             packetIDAndContentIDMap[nextPacketID] = content;
-            packetIDAndDBLookupCount[nextPacketID] = lookUpCount;
+            packetIDAndPhysicalDBLookupCount[nextPacketID] = lookUpCount;
+            packetIDAndRelationalDBLookupCount[nextPacketID] = 0;
             return nextPacketID++;
         }
         foreach (Vertex v, neighbor[u])
@@ -247,6 +248,7 @@ int PhysicalNetwork::searchProposedPathFromRequestedUser(const Vertex &requested
 {
     // DBLookupCount
     int lookUpCount = 0;
+    int relationalLookupCount = 0;
     // 使用する変数の初期化
     bool *f = new bool[userNodeNum];
     double tmpWeight;
@@ -271,11 +273,13 @@ int PhysicalNetwork::searchProposedPathFromRequestedUser(const Vertex &requested
             VertexList path = resolvePath(prev, requestedUser, u, true);
             packetIDAndPacketPathMap[nextPacketID] = path;
             packetIDAndContentIDMap[nextPacketID] = content;
-            packetIDAndDBLookupCount[nextPacketID] = lookUpCount;
+            packetIDAndPhysicalDBLookupCount[nextPacketID] = lookUpCount;
+            packetIDAndRelationalDBLookupCount[nextPacketID] = relationalLookupCount;
             return nextPacketID++;
         }
         // コンテンツとの距離を重みとする
         tmpWeight = relationalGraph->dijkstraShortestPathLength(physicalToRelational[u], content);
+        relationalLookupCount += relationalGraph->getRelationalLookupCountInLastTimeCall();
         #ifdef DEBUG
         cout << "RelationalShortestLength User(physicalID):" << u << " Content:" << content << " Length:" << tmpWeight << endl;
         #endif
@@ -441,9 +445,14 @@ int PhysicalNetwork::getContentIDFromPacketID(int _packetID)
     return packetIDAndContentIDMap[_packetID];
 }
 
-int PhysicalNetwork::getDBLookupCountFromPacketID(int _packetID)
+int PhysicalNetwork::getPhysicalDBLookupCountFromPacketID(int _packetID)
 {
-    return packetIDAndDBLookupCount[_packetID];
+    return packetIDAndPhysicalDBLookupCount[_packetID];
+}
+
+int PhysicalNetwork::getRelationalDBLookupCountFromPacketID(int _packetID)
+{
+    return packetIDAndRelationalDBLookupCount[_packetID];
 }
 
 int PhysicalNetwork::getNumberOfPaths(){

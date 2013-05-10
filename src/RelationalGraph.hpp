@@ -93,6 +93,8 @@ class RelationalGraph{
         RequestPossibilityList getRequestPossibilityList(Vertex _relationalID);
         // キャッシュのため
         VertexList getMostRelatedContentsFromUser(Vertex _userID, int cacheNum);
+        // 最後に読んだdijkstraShortestPathLength使用時のルックアップ回数をカウント
+        int getRelationalLookupCountInLastTimeCall();
     private:/*{{{*/
         int nodeNum;
         VertexList userList;
@@ -104,6 +106,7 @@ class RelationalGraph{
         void loadVertexType();
         void setUserList();
         void setContentList();/*}}}*/
+        int relationalGraphDataLookupCountInLastTimeCall; // 最後に呼ばれたリレーショナルグラフ参照時のデータ参照回数
 };
 
 #endif

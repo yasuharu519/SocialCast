@@ -173,7 +173,8 @@ double Simulator::calcRelationalStrengthOfPath(VertexList path, int contentID)
         relationalID = physicalNetwork->physicalToRelational[(*it)];
         if(relationalID != physicalNetwork->distributorID){
             tmp = relationalGraph->dijkstraShortestPathLength(relationalID, contentID);
-            result += 1.0 / tmp;
+            //result += 1.0 / tmp;
+            result += tmp;
             count++;
         }
     }
@@ -192,7 +193,8 @@ void Simulator::doContentSending(ContentStartSendingEvent* event,
     //int sendFrom = physicalNetwork->getUserOnPathIndexWithPacketID(packetID, event->getSendFromIndex());
     //int sendTo = physicalNetwork->getUserOnPathIndexWithPacketID(packetID, event->getSendFromIndex() + 1);
     VertexList path = physicalNetwork->getPathFromPacketID(packetID);
-    int DBLookupCount = physicalNetwork->getDBLookupCountFromPacketID(packetID);
+    int PhysicalDBLookupCount = physicalNetwork->getPhysicalDBLookupCountFromPacketID(packetID);
+    int RelationalDBLookupCount = physicalNetwork->getRelationalDBLookupCountFromPacketID(packetID);
     #ifdef DEBUG
     cout << "Length: " << path.size() << endl;
     #endif
@@ -223,7 +225,7 @@ void Simulator::doContentSending(ContentStartSendingEvent* event,
     double receiveTime = time + (CONTENT_SIZE / BANDWIDTH) * (path.size() - 1);
     // 書き込み
     distribution_datafile << receiveTime - time << ", " << calcRelationalStrengthOfPath(path, contentID) 
-        << ", " << DBLookupCount << endl;
+        << ", " << PhysicalDBLookupCount << ", " << RelationalDBLookupCount << endl;
     if(path.size() != 0){
         path_datafile << path[0];
         if(path.size() > 1){

@@ -14,6 +14,7 @@ RelationalGraph::RelationalGraph(){
     setUserList();
     setContentList();
     setRank();
+    relationalGraphDataLookupCountInLastTimeCall = 0;
 }
 
 RelationalGraph::~RelationalGraph(){
@@ -48,6 +49,7 @@ Weight RelationalGraph::getEdgeWeight(const Vertex &tail, const Vertex &head){/*
 
 double RelationalGraph::dijkstraShortestPathLength(const Vertex &node_from, const Vertex &node_to){/*{{{*/
     ShortestMap::iterator it;
+    relationalGraphDataLookupCountInLastTimeCall = 0; // 初期化
     // キャッシュから取り出し
     if(node_from < node_to)
     {
@@ -60,6 +62,7 @@ double RelationalGraph::dijkstraShortestPathLength(const Vertex &node_from, cons
     // キャッシュから取り出し終わり
     if(it != shortestmap.end()){
         //cout << "dist" << node_from << ", " << node_to << ", : " << it->second << endl;
+        relationalGraphDataLookupCountInLastTimeCall++;
         return it->second;
     }
     bool *f = new bool[nodeNum];
@@ -88,6 +91,7 @@ double RelationalGraph::dijkstraShortestPathLength(const Vertex &node_from, cons
         {
             shortestmap[NodePair(u, node_from)] = dist[u];
         }
+        relationalGraphDataLookupCountInLastTimeCall++;
         // キャッシュへの登録終わり
         if(node_to == u){
             //return shortestmap[NodePair(node_from, node_to)];
@@ -103,6 +107,10 @@ double RelationalGraph::dijkstraShortestPathLength(const Vertex &node_from, cons
         }
     }
     return shortestmap[NodePair(node_from, node_to)];
+}/*}}}*/
+
+int RelationalGraph::getRelationalLookupCountInLastTimeCall(){/*{{{*/
+    return relationalGraphDataLookupCountInLastTimeCall;
 }/*}}}*/
 
 int RelationalGraph::size(){/*{{{*/
@@ -303,8 +311,8 @@ void RelationalGraph::loadEdges(){/*{{{*/
     while(getline(weight_fs, weight_buff) && getline(link_fs, link_buff)){
         sscanf(weight_buff.data(), "%lf", &link_weight);
         sscanf(link_buff.data(), "%d %d", &node_from, &node_to);
-        // 値の反転 (値が小さいほど関係が強いことに)
-        link_weight = 1.0 / link_weight;
+        // 値の反転 (値が小さいほど関係が強いことに) <- 既になってる
+        // link_weight = 1.0 / link_weight;
         //cout << node_from << ", " << node_to << ", " << link_weight << endl;
         weight[add_edge(node_from, node_to)] = link_weight;
         weight[add_edge(node_to, node_from)] = link_weight;

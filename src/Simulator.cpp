@@ -333,6 +333,7 @@ int main(int argc, char* argv[])
     int requestCount;
     int cacheSize;
     bool useProposedMethod;
+    bool fillCacheBeforeSimulation = false;
     strcpy(program, argv[0]);
     if(argc < 3)
     {
@@ -353,7 +354,8 @@ int main(int argc, char* argv[])
         distribution_datafile.open("LatencyAndSumOfSocialMetric_proposed.txt");
         path_datafile.open("path_proposed.txt");
         Simulator *simulator = new Simulator();
-        simulator->setCacheBasedOnMethod(useProposedMethod, cacheSize);
+        if(fillCacheBeforeSimulation)
+            simulator->setCacheBasedOnMethod(useProposedMethod, cacheSize);
         simulator->doSimulation(requestCount, cacheSize, useProposedMethod, distribution_datafile, path_datafile);
         distribution_datafile.close();
         path_datafile.close();
@@ -363,7 +365,8 @@ int main(int argc, char* argv[])
         useProposedMethod = false;
         distribution_datafile.open("LatencyAndSumOfSocialMetric_conventional.txt");
         path_datafile.open("path_conventional.txt");
-        simulator->setCacheBasedOnMethod(useProposedMethod, cacheSize);
+        if(fillCacheBeforeSimulation)
+            simulator->setCacheBasedOnMethod(useProposedMethod, cacheSize);
         simulator->doSimulation(requestCount, cacheSize, useProposedMethod, distribution_datafile, path_datafile);
         distribution_datafile.close();
         path_datafile.close();

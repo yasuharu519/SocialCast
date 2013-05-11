@@ -265,7 +265,6 @@ int PhysicalNetwork::searchProposedPathFromRequestedUser(const Vertex &requested
         boost::tuples::tie(d_u, u) = q.top(), q.pop();
         if (f[u]) continue; 
         f[u] = true;
-        lookUpCount++; // DBLookUpCountの更新
         if(nodeHasContent(u, content)){
             #ifdef DEBUG
             cout << "RelationalDistance: " << dist[u] << endl;
@@ -277,6 +276,7 @@ int PhysicalNetwork::searchProposedPathFromRequestedUser(const Vertex &requested
             packetIDAndRelationalDBLookupCount[nextPacketID] = relationalLookupCount;
             return nextPacketID++;
         }
+        lookUpCount++; // DBLookUpCountの更新
         // コンテンツとの距離を重みとする
         tmpWeight = relationalGraph->dijkstraShortestPathLength(physicalToRelational[u], content);
         relationalLookupCount += relationalGraph->getRelationalLookupCountInLastTimeCall();
